@@ -135,7 +135,7 @@ button {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 256px minmax(0, 1fr) 304px;
   height: 100vh;
   overflow: hidden;
 }
@@ -158,19 +158,8 @@ button {
 }
 
 .libraryDock {
-  position: absolute;
-  z-index: 22;
-  top: 0;
-  left: 0;
-  width: min(300px, 90vw);
-  height: 100vh;
   border-right: 1px solid rgba(127, 248, 255, 0.2);
-  box-shadow: inset -16px 0 38px rgba(127, 248, 255, 0.025), 10px 0 42px rgba(0, 0, 0, 0.38);
-  transition: transform 180ms ease;
-}
-
-.appShell.sidebarCollapsed .libraryDock {
-  transform: translateX(calc(-100% + 56px));
+  box-shadow: inset -16px 0 38px rgba(127, 248, 255, 0.025);
 }
 
 .controlDock {
@@ -182,20 +171,9 @@ button {
 
 .brandBlock {
   display: flex;
-  width: 100%;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding: 4px;
-  border: 1px solid transparent;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-}
-
-.brandBlock:hover {
-  border-color: rgba(127, 248, 255, 0.2);
-  background: rgba(127, 248, 255, 0.04);
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .brandMark {
@@ -2439,7 +2417,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .appShell:has(.immersiveMode) {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 292px;
 }
 
 .appShell:has(.immersiveMode) .libraryDock {
@@ -2540,29 +2518,33 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .appShell {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 220px minmax(0, 1fr) 286px;
     align-items: start;
-    height: auto;
-    min-height: 100vh;
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .stage {
     align-self: start;
     grid-template-rows: auto auto auto auto;
-    overflow: visible;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .libraryDock {
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
     max-height: 100vh;
   }
 
   .controlDock {
-    grid-column: 1 / -1;
-    border-left: 0;
-    border-top: 1px solid rgba(161, 219, 230, 0.18);
+    border-left: 1px solid rgba(255, 77, 240, 0.18);
+    border-top: 0;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: auto;
   }
 
   .analysisGrid {
@@ -2577,14 +2559,10 @@ input[type="range"]::-moz-range-thumb {
 
   .libraryDock,
   .controlDock {
-    padding: 16px;
+    padding: 18px;
+    position: static;
+    height: auto;
     max-height: none;
-  }
-
-  .libraryDock {
-    position: fixed;
-    width: min(280px, 88vw);
-    height: 100dvh;
   }
 
   .stage {

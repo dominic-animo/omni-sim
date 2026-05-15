@@ -593,7 +593,6 @@ export function App() {
   const [activeId, setActiveId] = useState<LiveSimulatorId>(readStoredActiveSimulator);
   const [disciplineFilter, setDisciplineFilter] = useState<DisciplineFilter>(readStoredDisciplineFilter);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
   const ActiveSimulator = useMemo(() => simulatorModules[activeId], [activeId]);
   const visibleSimulators = useMemo(
     () => {
@@ -646,22 +645,16 @@ export function App() {
   }, [disciplineFilter]);
 
   return (
-    <main className={`appShell ${isLibraryCollapsed ? "sidebarCollapsed" : ""}`}>
+    <main className="appShell">
       <aside className="libraryDock">
-        <button
-          type="button"
-          className="brandBlock"
-          onClick={() => setIsLibraryCollapsed((current) => !current)}
-          aria-label={`${isLibraryCollapsed ? "Expand" : "Collapse"} simulator sidebar`}
-          aria-expanded={!isLibraryCollapsed}
-        >
-          <span className="brandMark">
+        <div className="brandBlock">
+          <div className="brandMark">
             <Atom size={22} aria-hidden="true" />
-          </span>
-          <span>
+          </div>
+          <div>
             <h1>Omni-Sim</h1>
-          </span>
-        </button>
+          </div>
+        </div>
 
         <div className="dockTitle">
           <Sparkles size={16} aria-hidden="true" />
