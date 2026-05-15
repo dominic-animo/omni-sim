@@ -653,7 +653,6 @@ export function App() {
           </div>
           <div>
             <h1>Omni-Sim</h1>
-            <p>Physics, Chemistry, And Math Lab</p>
           </div>
         </div>
 
