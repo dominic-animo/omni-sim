@@ -610,7 +610,7 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px 14px 6px;
+  padding: 6px 10px 4px;
   border-bottom: 1px solid rgba(127, 248, 255, 0.12);
   background:
     linear-gradient(180deg, rgba(10, 22, 31, 0.62), rgba(6, 13, 19, 0.24)),
@@ -2540,7 +2540,7 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .appShell {
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     height: auto;
     min-height: 100vh;
@@ -2553,8 +2553,9 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .libraryDock {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
     max-height: 100vh;
   }
 
@@ -2576,9 +2577,14 @@ input[type="range"]::-moz-range-thumb {
 
   .libraryDock,
   .controlDock {
-    padding: 18px;
-    position: static;
+    padding: 16px;
     max-height: none;
+  }
+
+  .libraryDock {
+    position: fixed;
+    width: min(280px, 88vw);
+    height: 100dvh;
   }
 
   .stage {
