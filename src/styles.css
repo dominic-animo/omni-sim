@@ -135,7 +135,7 @@ button {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 256px minmax(0, 1fr) 304px;
+  grid-template-columns: minmax(0, 1fr);
   height: 100vh;
   overflow: hidden;
 }
@@ -158,8 +158,19 @@ button {
 }
 
 .libraryDock {
+  position: absolute;
+  z-index: 22;
+  top: 0;
+  left: 0;
+  width: min(300px, 90vw);
+  height: 100vh;
   border-right: 1px solid rgba(127, 248, 255, 0.2);
-  box-shadow: inset -16px 0 38px rgba(127, 248, 255, 0.025);
+  box-shadow: inset -16px 0 38px rgba(127, 248, 255, 0.025), 10px 0 42px rgba(0, 0, 0, 0.38);
+  transition: transform 180ms ease;
+}
+
+.appShell.sidebarCollapsed .libraryDock {
+  transform: translateX(calc(-100% + 56px));
 }
 
 .controlDock {
@@ -171,9 +182,20 @@ button {
 
 .brandBlock {
   display: flex;
+  width: 100%;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.brandBlock:hover {
+  border-color: rgba(127, 248, 255, 0.2);
+  background: rgba(127, 248, 255, 0.04);
 }
 
 .brandMark {
@@ -587,8 +609,8 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 18px 26px 10px;
+  gap: 10px;
+  padding: 8px 14px 6px;
   border-bottom: 1px solid rgba(127, 248, 255, 0.12);
   background:
     linear-gradient(180deg, rgba(10, 22, 31, 0.62), rgba(6, 13, 19, 0.24)),
@@ -604,9 +626,9 @@ h2 {
 .transport button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 11px;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 8px;
   border: 1px solid rgba(127, 248, 255, 0.28);
   border-radius: 5px;
   background:
@@ -2417,7 +2439,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .appShell:has(.immersiveMode) {
-  grid-template-columns: minmax(0, 1fr) 292px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .appShell:has(.immersiveMode) .libraryDock {
@@ -2618,4 +2640,14 @@ input[type="range"]::-moz-range-thumb {
     padding-left: 16px;
     padding-right: 16px;
   }
+}
+
+.controlDock {
+  font-size: 0.9rem;
+}
+
+.controlDock button,
+.controlDock input,
+.controlDock select {
+  min-height: 30px;
 }
