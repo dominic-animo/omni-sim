@@ -928,6 +928,252 @@ h2 {
   height: 100%;
 }
 
+.photoelectricTubeScene {
+  min-height: 320px;
+  isolation: isolate;
+}
+
+.photoelectricTubeSvg {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tubeReferenceGrid path {
+  stroke: rgba(127, 248, 255, 0.075);
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+
+.tubeChamberFill {
+  opacity: 0.92;
+  filter: drop-shadow(0 0 18px rgba(127, 248, 255, 0.08));
+}
+
+.tubeChamberEdge {
+  stroke-width: 1.4;
+}
+
+.tubeGlassHighlight {
+  fill: none;
+  stroke: rgba(233, 251, 255, 0.34);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.tubeGlassHighlight.lower {
+  stroke: rgba(255, 77, 240, 0.16);
+  stroke-width: 1.2;
+}
+
+.tubeSource path:first-child {
+  fill: rgba(6, 19, 26, 0.9);
+  stroke: rgba(127, 248, 255, 0.34);
+  stroke-width: 1.1;
+}
+
+.tubeSource circle {
+  fill: rgba(233, 251, 255, 0.05);
+  stroke: var(--photon-color);
+  stroke-width: 1.1;
+  filter: drop-shadow(0 0 14px var(--photon-color));
+}
+
+.tubeSource path:not(:first-child) {
+  fill: none;
+  stroke: rgba(233, 251, 255, 0.58);
+  stroke-width: 1.2;
+}
+
+.tubeSource text,
+.tubeCircuitTraces text,
+.tubeThresholdLock text {
+  fill: rgba(203, 228, 235, 0.72);
+  font-family: "Proxima Nova", "Inter", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tubePhotonBeam {
+  filter: drop-shadow(0 0 18px var(--photon-color));
+}
+
+.tubePhotonParticle {
+  filter: drop-shadow(0 0 8px var(--photon-color));
+}
+
+.tubeCathodeFrame {
+  fill: rgba(244, 201, 93, 0.28);
+  stroke: rgba(255, 240, 194, 0.68);
+  stroke-width: 1.8;
+}
+
+.tubeCathodeFace {
+  stroke: rgba(255, 247, 221, 0.72);
+  stroke-width: 1.1;
+}
+
+.tubeCathodeBrush {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.42);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.tubeCathodeBrush.second {
+  stroke: rgba(0, 8, 12, 0.22);
+}
+
+.tubeSparkRing {
+  fill: none;
+  stroke-width: 1.2;
+  opacity: 0.64;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tubeSparkPulse 2.2s ease-in-out infinite;
+}
+
+.tubeFieldVolume path {
+  fill: none;
+  stroke: rgba(255, 77, 240, 0.72);
+  stroke-width: 1;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 7px rgba(255, 77, 240, 0.34));
+}
+
+.tubeElectronPaths path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 1.45;
+  vector-effect: non-scaling-stroke;
+}
+
+.tubeElectronPaths .collected {
+  stroke: rgba(127, 248, 255, 0.92);
+  filter: drop-shadow(0 0 8px rgba(127, 248, 255, 0.38));
+}
+
+.tubeElectronPaths .stopped {
+  stroke: rgba(255, 77, 240, 0.78);
+  stroke-dasharray: 5 7;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 240, 0.22));
+}
+
+.tubeElectronParticle {
+  fill: #7ff8ff;
+  filter: drop-shadow(0 0 8px rgba(127, 248, 255, 0.84));
+}
+
+.tubeElectronParticle.stopped {
+  fill: #ff9cf7;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 240, 0.74));
+}
+
+.tubeThresholdLock path {
+  fill: none;
+  stroke: rgba(255, 77, 240, 0.7);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 6;
+  filter: drop-shadow(0 0 10px rgba(255, 77, 240, 0.32));
+}
+
+.tubeCollector rect:first-child {
+  stroke: rgba(233, 251, 255, 0.72);
+  stroke-width: 1.2;
+}
+
+.tubeCollectorLine,
+.tubeCollectorLead {
+  fill: none;
+  stroke: rgba(233, 251, 255, 0.64);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.tubeCollectorLead {
+  stroke: rgba(255, 77, 240, 0.58);
+}
+
+.tubeCircuitTraces path {
+  fill: none;
+  stroke: rgba(169, 239, 120, 0.28);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.tubeCircuitTraces rect {
+  fill: rgba(4, 12, 18, 0.82);
+  stroke: rgba(169, 239, 120, 0.36);
+  stroke-width: 1;
+}
+
+.tubeCallout path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.68;
+  vector-effect: non-scaling-stroke;
+}
+
+.tubeCallout circle {
+  fill: rgba(2, 8, 12, 0.9);
+  stroke: currentColor;
+  stroke-width: 1.4;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.tubeCalloutCard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 128px;
+  min-height: 22px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, currentColor 44%, transparent);
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, currentColor 14%, transparent), rgba(4, 12, 18, 0.74)),
+    rgba(4, 12, 18, 0.86);
+  color: color-mix(in srgb, currentColor 78%, #e9fbff);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.tubeValueCard {
+  max-width: 144px;
+  min-height: 26px;
+  padding: 4px 7px;
+  text-transform: none;
+}
+
+.tubeValueCard .katex {
+  color: inherit;
+  font-size: 0.76rem;
+}
+
+@keyframes tubeSparkPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.86);
+  }
+
+  50% {
+    opacity: 0.82;
+    transform: scale(1.12);
+  }
+}
+
 .canvasScene {
   display: block;
   width: 100%;
