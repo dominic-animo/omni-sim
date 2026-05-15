@@ -23,6 +23,8 @@ type MovingParticle = {
   phase: number;
 };
 
+const cylinderUp = new THREE.Vector3(0, 1, 0);
+
 function renderSceneValue(element: HTMLElement, math: string) {
   katex.render(math, element, {
     throwOnError: false,
@@ -191,7 +193,7 @@ export function PhotoelectricScene({
       depthWrite: false,
     });
     const plate = new THREE.Group();
-    const emitterCoreGeometry = new THREE.BoxGeometry(0.22, 3.15, 3.15);
+    const emitterCoreGeometry = new THREE.BoxGeometry(1.18, 3.15, 0.18);
     const emitterCore = new THREE.Mesh(emitterCoreGeometry, metalMaterial);
     const brushedLineMaterial = new THREE.MeshBasicMaterial({
       color: 0xf4c95d,
@@ -244,57 +246,72 @@ export function PhotoelectricScene({
     const emitterSurfaceDetails = new THREE.Group();
     for (let i = 0; i < 5; i += 1) {
       const line = new THREE.Mesh(i % 3 === 0 ? darkGrooveGeometry : brushedLineGeometry, i % 3 === 0 ? darkGrooveMaterial : brushedLineMaterial);
-      line.position.set(0.116, 0, -0.82 + i * 0.42);
+      line.position.set(-0.44 + i * 0.22, 0, -0.118);
       emitterSurfaceDetails.add(line);
     }
     const emitterGlintA = new THREE.Mesh(plateGlintGeometry, plateGlintMaterial);
-    emitterGlintA.position.set(0.121, 0.88, -0.92);
-    emitterGlintA.rotation.x = 0.68;
+    emitterGlintA.position.set(-0.3, 0.88, -0.13);
+    emitterGlintA.rotation.z = 0.68;
     const emitterGlintB = new THREE.Mesh(plateGlintGeometry, plateGlintMaterial);
-    emitterGlintB.position.set(0.122, -0.72, 0.88);
-    emitterGlintB.rotation.x = 0.68;
+    emitterGlintB.position.set(0.34, -0.72, -0.13);
+    emitterGlintB.rotation.z = 0.68;
     const emitterReflectionA = new THREE.Mesh(reflectionBandGeometry, warmReflectionMaterial);
-    emitterReflectionA.position.set(0.128, 0.34, -0.38);
-    emitterReflectionA.rotation.x = 0.74;
+    emitterReflectionA.position.set(-0.18, 0.34, -0.136);
+    emitterReflectionA.rotation.z = 0.74;
     const emitterReflectionB = new THREE.Mesh(reflectionBandGeometry, coolReflectionMaterial);
-    emitterReflectionB.position.set(0.129, -0.46, 0.54);
-    emitterReflectionB.rotation.x = 0.74;
+    emitterReflectionB.position.set(0.25, -0.46, -0.136);
+    emitterReflectionB.rotation.z = 0.74;
     emitterSurfaceDetails.add(emitterGlintA, emitterGlintB, emitterReflectionA, emitterReflectionB);
-    const emitterFrameGeometry = new THREE.BoxGeometry(0.34, 3.5, 0.095);
+    const emitterFrameGeometry = new THREE.BoxGeometry(1.42, 0.11, 0.28);
     const emitterFrameTop = new THREE.Mesh(emitterFrameGeometry, emitterFrameMaterial);
     const emitterFrameBottom = new THREE.Mesh(emitterFrameGeometry, emitterFrameMaterial);
-    emitterFrameTop.position.z = 1.65;
-    emitterFrameBottom.position.z = -1.65;
-    const emitterFrameSideGeometry = new THREE.BoxGeometry(0.34, 0.095, 3.5);
+    emitterFrameTop.position.y = 1.63;
+    emitterFrameBottom.position.y = -1.63;
+    const emitterFrameSideGeometry = new THREE.BoxGeometry(0.11, 3.48, 0.28);
     const emitterFrameUpper = new THREE.Mesh(emitterFrameSideGeometry, emitterFrameMaterial);
     const emitterFrameLower = new THREE.Mesh(emitterFrameSideGeometry, emitterFrameMaterial);
-    emitterFrameUpper.position.y = 1.65;
-    emitterFrameLower.position.y = -1.65;
+    emitterFrameUpper.position.x = 0.64;
+    emitterFrameLower.position.x = -0.64;
     [-1, 1].forEach((ySign) => {
       [-1, 1].forEach((zSign) => {
         const bolt = new THREE.Mesh(boltGeometry, boltMaterial);
-        bolt.position.set(0.155, ySign * 1.38, zSign * 1.38);
+        bolt.position.set(zSign * 0.48, ySign * 1.38, -0.16);
         emitterSurfaceDetails.add(bolt);
       });
     });
-    const emitterSlotGeometry = new THREE.BoxGeometry(0.245, 0.035, 1.45);
-    const emitterFrontGlowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x7ff8ff,
-      transparent: true,
-      opacity: 0.16,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    });
-    const emitterFrontGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 2.85), emitterFrontGlowMaterial);
-    emitterFrontGlow.position.set(-0.125, 0, -1.58);
-    emitterFrontGlow.rotation.y = Math.PI / 2;
-    plate.add(emitterCore, emitterSurfaceDetails, emitterFrameTop, emitterFrameBottom, emitterFrameUpper, emitterFrameLower, emitterFrontGlow);
+    plate.add(emitterCore, emitterSurfaceDetails, emitterFrameTop, emitterFrameBottom, emitterFrameUpper, emitterFrameLower);
+    const emitterSlotGeometry = new THREE.BoxGeometry(0.74, 0.035, 0.026);
     for (let i = 0; i < 5; i += 1) {
       const slot = new THREE.Mesh(emitterSlotGeometry, emitterSlotMaterial);
-      slot.position.set(-0.015, -1.0 + i * 0.5, -1.58);
+      slot.position.set(0, -1.0 + i * 0.5, -0.155);
       plate.add(slot);
     }
+    const impactGlowMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(state.color),
+      transparent: true,
+      opacity: 0.48,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+    });
+    const impactRingMaterial = new THREE.MeshBasicMaterial({
+      color: 0xe9fbff,
+      transparent: true,
+      opacity: 0.74,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+    });
+    const impactGlowGeometry = new THREE.CircleGeometry(0.54, 48);
+    const impactRingGeometry = new THREE.RingGeometry(0.42, 0.48, 56);
+    const impactPatch = new THREE.Group();
+    const impactGlow = new THREE.Mesh(impactGlowGeometry, impactGlowMaterial);
+    const impactRing = new THREE.Mesh(impactRingGeometry, impactRingMaterial);
+    impactPatch.position.set(0, 0, -0.168);
+    impactPatch.add(impactGlow, impactRing);
+    plate.add(impactPatch);
     plate.position.x = -1.4;
     scene.add(plate);
 
@@ -315,40 +332,42 @@ export function PhotoelectricScene({
       depthWrite: false,
     });
     const collector = new THREE.Group();
-    const collectorCoreGeometry = new THREE.BoxGeometry(0.18, 2.75, 2.75);
+    const collectorCoreGeometry = new THREE.BoxGeometry(0.86, 2.75, 0.18);
     const collectorCore = new THREE.Mesh(collectorCoreGeometry, collectorMaterial);
     const collectorSurfaceDetails = new THREE.Group();
     for (let i = 0; i < 5; i += 1) {
       const line = new THREE.Mesh(i % 2 ? brushedLineGeometry : darkGrooveGeometry, i % 2 ? brushedLineMaterial : darkGrooveMaterial);
-      line.position.set(-0.098, 0, -0.84 + i * 0.42);
+      line.position.set(-0.32 + i * 0.16, 0, -0.106);
       collectorSurfaceDetails.add(line);
     }
     const collectorGlint = new THREE.Mesh(plateGlintGeometry, plateGlintMaterial);
-    collectorGlint.position.set(-0.102, 0.7, 0.72);
-    collectorGlint.rotation.x = -0.62;
+    collectorGlint.position.set(0.18, 0.7, -0.112);
+    collectorGlint.rotation.z = -0.62;
     const collectorReflectionA = new THREE.Mesh(reflectionBandGeometry, coolReflectionMaterial);
-    collectorReflectionA.position.set(-0.106, 0.28, -0.52);
-    collectorReflectionA.rotation.x = -0.74;
+    collectorReflectionA.position.set(-0.16, 0.28, -0.118);
+    collectorReflectionA.rotation.z = -0.74;
     const collectorReflectionB = new THREE.Mesh(reflectionBandGeometry, warmReflectionMaterial);
-    collectorReflectionB.position.set(-0.107, -0.58, 0.54);
-    collectorReflectionB.rotation.x = -0.74;
+    collectorReflectionB.position.set(0.22, -0.58, -0.118);
+    collectorReflectionB.rotation.z = -0.74;
     [-1, 1].forEach((ySign) => {
       [-1, 1].forEach((zSign) => {
         const bolt = new THREE.Mesh(boltGeometry, boltMaterial);
-        bolt.position.set(-0.124, ySign * 1.16, zSign * 1.16);
+        bolt.position.set(zSign * 0.32, ySign * 1.16, -0.14);
         collectorSurfaceDetails.add(bolt);
       });
     });
     collectorSurfaceDetails.add(collectorGlint, collectorReflectionA, collectorReflectionB);
-    const collectorStripeGeometry = new THREE.BoxGeometry(0.19, 2.42, 0.035);
+    const collectorStripeGeometry = new THREE.BoxGeometry(0.035, 2.42, 0.035);
     const collectorStripeA = new THREE.Mesh(collectorStripeGeometry, collectorAccentMaterial);
     const collectorStripeB = new THREE.Mesh(collectorStripeGeometry, collectorAccentMaterial);
-    collectorStripeA.position.z = 0.62;
-    collectorStripeB.position.z = -0.62;
+    collectorStripeA.position.x = 0.28;
+    collectorStripeA.position.z = -0.13;
+    collectorStripeB.position.x = -0.28;
+    collectorStripeB.position.z = -0.13;
     const collectorNodeGeometry = new THREE.SphereGeometry(0.065, 16, 16);
     for (let i = 0; i < 6; i += 1) {
       const node = new THREE.Mesh(collectorNodeGeometry, collectorAccentMaterial);
-      node.position.set(-0.12, -1.0 + i * 0.4, 1.25);
+      node.position.set(0.36, -1.0 + i * 0.4, -0.16);
       collector.add(node);
     }
     collector.add(collectorCore, collectorSurfaceDetails, collectorStripeA, collectorStripeB);
@@ -362,16 +381,13 @@ export function PhotoelectricScene({
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
-    const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.075, 0.075, 3.55, 24),
-      beamMaterial,
-    );
-    beam.rotation.z = Math.PI / 2;
-    beam.position.x = -3.15;
+    const beamGeometry = new THREE.CylinderGeometry(0.16, 0.08, 1, 32);
+    const beam = new THREE.Mesh(beamGeometry, beamMaterial);
     scene.add(beam);
 
     const photonGeometry = new THREE.SphereGeometry(0.07, 16, 16);
     const electronGeometry = new THREE.SphereGeometry(0.055, 16, 16);
+    const impactSparkGeometry = new THREE.SphereGeometry(0.032, 10, 10);
     const photonMaterial = new THREE.MeshBasicMaterial({
       color: new THREE.Color(state.color),
       transparent: true,
@@ -406,12 +422,24 @@ export function PhotoelectricScene({
       };
     });
 
+    const impactSparks: MovingParticle[] = Array.from({ length: 14 }, (_, index) => {
+      const mesh = new THREE.Mesh(impactSparkGeometry, photonMaterial);
+      mesh.position.set(-1.4, 0, -0.168);
+      scene.add(mesh);
+      return {
+        mesh,
+        lane: (index % 7) - 3,
+        phase: index / 14,
+        speed: 0.018 + (index % 4) * 0.003,
+      };
+    });
+
     const fieldLines = new THREE.Group();
     for (let i = 0; i < 9; i += 1) {
       const points = [
-        new THREE.Vector3(-1.2, -1.15 + i * 0.28, -1.55),
-        new THREE.Vector3(0.3, -1.0 + i * 0.25, -0.3),
-        new THREE.Vector3(1.95, -1.15 + i * 0.28, 1.25),
+        new THREE.Vector3(-1.38, -1.15 + i * 0.28, -0.18),
+        new THREE.Vector3(0.3, -1.0 + i * 0.25, -0.08),
+        new THREE.Vector3(1.72, -1.15 + i * 0.28, -0.16),
       ];
       const curve = new THREE.CatmullRomCurve3(points);
       const geometry = new THREE.TubeGeometry(curve, 24, 0.01, 8, false);
@@ -465,24 +493,24 @@ export function PhotoelectricScene({
       return new CSS2DObject(element);
     };
 
-    const emitterLabel = makeLabel("Emitter Plate");
-    emitterLabel.position.set(-0.1, 1.92, 0);
+    const emitterLabel = makeLabel("Illuminated Cathode");
+    emitterLabel.position.set(0.05, 1.92, -0.22);
     plate.add(emitterLabel);
 
     const collectorLabel = makeLabel("Collector Plate");
     collectorLabel.position.set(0.1, 1.65, 0);
     collector.add(collectorLabel);
 
-    const beamLabel = makeLabel("Photon Beam");
-    beamLabel.position.set(-3.72, 0.92, -0.34);
+    const beamLabel = makeLabel("Incident Photon Beam");
+    beamLabel.position.set(-3.14, 0.98, -2.08);
     scene.add(beamLabel);
 
     const electronLabel = makeLabel("Emitted Electrons");
-    electronLabel.position.set(-0.05, 0.82, 0.76);
+    electronLabel.position.set(-0.05, 0.82, -0.22);
     scene.add(electronLabel);
 
     const fieldLabel = makeLabel("Electric Field Lines");
-    fieldLabel.position.set(0.45, -1.15, 1.34);
+    fieldLabel.position.set(0.45, -1.15, -0.18);
     scene.add(fieldLabel);
 
     const guideLabel = makeLabel("Measurement Guides");
@@ -499,7 +527,7 @@ export function PhotoelectricScene({
     ];
 
     const photonEnergyValue = makeLabel("", "sceneTag sceneValueTag");
-    photonEnergyValue.position.set(-3.78, 1.06, 0.46);
+    photonEnergyValue.position.set(-3.78, 1.06, -1.76);
     scene.add(photonEnergyValue);
 
     const kineticEnergyValue = makeLabel("", "sceneTag sceneValueTag");
@@ -565,10 +593,13 @@ export function PhotoelectricScene({
 
       const photonColor = new THREE.Color(current.color);
       beamMaterial.color.copy(photonColor);
-      beamMaterial.opacity = 0.24 + current.electronRate * 0.36;
-      beam.scale.set(current.beamFocus * 0.6 + 0.55, 1, current.beamFocus * 0.6 + 0.55);
+      beamMaterial.opacity = 0.22 + current.intensity * 0.42;
       photonMaterial.color.copy(photonColor);
       photonMaterial.opacity = 0.46 + current.intensity * 0.54;
+      impactGlowMaterial.color.copy(photonColor);
+      impactGlowMaterial.opacity = 0.28 + current.intensity * 0.3 + current.electronRate * 0.22;
+      impactRingMaterial.opacity = 0.42 + current.intensity * 0.18 + current.electronRate * 0.28;
+      impactPatch.scale.setScalar(0.92 + current.beamFocus * 0.5 + Math.sin(t * 0.036) * 0.035);
 
       const metal = new THREE.Color(currentMetal);
       metalMaterial.color.copy(metal).lerp(new THREE.Color(0xffe0a5), 0.34);
@@ -581,9 +612,14 @@ export function PhotoelectricScene({
       emitterSurfaceDetails.rotation.x = Math.sin(t * 0.006) * 0.015;
       collectorSurfaceDetails.rotation.x = -Math.sin(t * 0.006) * 0.012;
       collector.position.x = -0.45 + Math.min(4.2, Math.max(1.1, currentSpacing * 0.42));
-      const emitterSurfaceX = plate.position.x + 0.18;
-      const emitterEmissionZ = -1.46;
-      const collectorFaceX = collector.position.x - 0.16;
+      const emitterSurfaceX = plate.position.x;
+      const emitterEmissionZ = -0.168;
+      const emissionOrigin = new THREE.Vector3(emitterSurfaceX + 0.02, 0, emitterEmissionZ);
+      const photonSource = new THREE.Vector3(-4.05, 0.58, -2.28);
+      const photonDirection = emissionOrigin.clone().sub(photonSource);
+      const beamLength = photonDirection.length();
+      const beamDirection = photonDirection.clone().normalize();
+      const collectorFaceX = collector.position.x - 0.48;
       const flightSpan = Math.max(0.2, collectorFaceX - emitterSurfaceX);
       const collectionFraction = Math.max(0, Math.min(1, current.collectionFraction));
       const stoppingStress = Math.max(0, Math.min(1, current.stoppingRatio));
@@ -598,9 +634,11 @@ export function PhotoelectricScene({
       kineticEnergyValue.position.x = (plate.position.x + collector.position.x) / 2;
       currentValue.position.x = (plate.position.x + collector.position.x) / 2 + 0.68;
       fieldValue.position.x = (plate.position.x + collector.position.x) / 2;
+      beam.position.copy(photonSource).addScaledVector(beamDirection, beamLength * 0.5);
+      beam.quaternion.setFromUnitVectors(cylinderUp, beamDirection);
+      beam.scale.set(current.beamFocus * 0.68 + 0.5, beamLength, current.beamFocus * 0.68 + 0.5);
       emitterFrameMaterial.opacity = 0.76 + current.relativeCurrent * 0.14;
       emitterSlotMaterial.opacity = 0.2 + current.electronRate * 0.36;
-      emitterFrontGlowMaterial.opacity = 0.08 + current.electronRate * 0.24;
       collectorAccentMaterial.opacity = 0.38 + current.relativeCurrent * 0.34;
       warmReflectionMaterial.opacity = 0.1 + current.relativeCurrent * 0.08;
       coolReflectionMaterial.opacity = 0.09 + current.relativeCurrent * 0.08;
@@ -613,13 +651,16 @@ export function PhotoelectricScene({
         const reachesCollector = collectionFraction > 0.04 && sequence < collectionFraction;
         const lane = index - (electronPathLines.length - 1) / 2;
         const laneY = lane * 0.16;
-        const laneZ = Math.sin(index * 1.7) * 0.58;
+        const laneZ = Math.sin(index * 1.7) * 0.46;
         const maxProgress = reachesCollector ? 1 : 0.26 + collectionFraction * 0.42;
         const points = Array.from({ length: 26 }, (_, pointIndex) => {
           const progress = pointIndex / 25;
           const travel = reachesCollector ? progress * maxProgress : Math.sin(progress * Math.PI) * maxProgress;
           const y = laneY + Math.sin(progress * Math.PI) * (reachesCollector ? 0.22 : 0.42);
-          const z = laneZ * (0.35 + 0.65 * Math.sin(progress * Math.PI));
+          const z =
+            emitterEmissionZ +
+            laneZ * Math.sin(progress * Math.PI) +
+            (reachesCollector ? progress * 1.08 : Math.sin(progress * Math.PI) * 0.22);
           return new THREE.Vector3(emitterSurfaceX + travel * flightSpan, y, z);
         });
         line.geometry.setFromPoints(points);
@@ -629,15 +670,33 @@ export function PhotoelectricScene({
 
       photons.forEach((particle, index) => {
         if (!isPaused) {
-          particle.phase += particle.speed * currentSpeed * (0.6 + current.electronRate);
+          particle.phase += particle.speed * currentSpeed * (0.55 + current.intensity * 0.65);
         }
         particle.phase %= 1;
-        particle.mesh.position.x = -5.1 + particle.phase * 3.7;
-        particle.mesh.position.y =
-          particle.lane * 0.16 + Math.sin(t * 0.05 + index) * 0.035;
-        particle.mesh.position.z = Math.cos(t * 0.035 + index * 0.4) * 0.42;
-        particle.mesh.scale.setScalar(0.82 + current.electronRate * 1.35);
-        particle.mesh.visible = index / photons.length < 0.22 + current.electronRate * 0.78;
+        const focusWidth = 0.42 - current.beamFocus * 0.2;
+        const lateral = new THREE.Vector3(
+          Math.sin(index * 1.9) * 0.06,
+          particle.lane * focusWidth * 0.18 + Math.sin(t * 0.04 + index) * 0.03,
+          Math.cos(index * 1.3) * focusWidth,
+        );
+        particle.mesh.position.copy(photonSource).lerp(emissionOrigin, particle.phase).add(lateral.multiplyScalar(1 - particle.phase * 0.7));
+        particle.mesh.scale.setScalar(0.76 + current.intensity * 0.42 + (1 - particle.phase) * 0.16);
+        particle.mesh.visible = index / photons.length < 0.14 + current.intensity * 0.86;
+      });
+
+      impactSparks.forEach((particle, index) => {
+        if (!isPaused) {
+          particle.phase += particle.speed * currentSpeed * (0.55 + current.intensity);
+        }
+        particle.phase %= 1;
+        const burst = Math.sin(particle.phase * Math.PI);
+        particle.mesh.visible = current.intensity > 0.05 && index / impactSparks.length < 0.16 + current.intensity * 0.78;
+        particle.mesh.position.set(
+          emitterSurfaceX + 0.05 + burst * 0.08,
+          particle.lane * 0.055 + Math.sin(index * 1.4) * 0.05 * burst,
+          emitterEmissionZ + Math.cos(index * 1.8) * 0.28 * burst,
+        );
+        particle.mesh.scale.setScalar(0.45 + burst * (0.8 + current.electronRate * 0.9));
       });
 
       electrons.forEach((particle, index) => {
@@ -661,8 +720,8 @@ export function PhotoelectricScene({
           particle.lane * 0.12 +
           Math.sin(t * 0.04 + index) * 0.12 +
           (reachesCollector ? 0 : Math.sin(particle.phase * Math.PI) * 0.22);
-        const lateralSpread = Math.sin(particle.phase * Math.PI * 2 + index * 0.8) * 0.08;
-        const driftToCenter = reachesCollector ? particle.phase * 0.38 : particle.phase * 0.12;
+        const lateralSpread = Math.sin(particle.phase * Math.PI * 2 + index * 0.8) * 0.16;
+        const driftToCenter = reachesCollector ? particle.phase * 1.08 : particle.phase * 0.28;
         particle.mesh.position.z = emitterEmissionZ + lateralSpread + driftToCenter;
         particle.mesh.scale.setScalar((reachesCollector ? 1 : 0.82 + Math.sin(particle.phase * Math.PI) * 0.22) + current.maxKineticEnergyEv * 0.14);
       });
@@ -693,19 +752,23 @@ export function PhotoelectricScene({
       floorMaterial.dispose();
       photonGeometry.dispose();
       electronGeometry.dispose();
+      impactSparkGeometry.dispose();
+      beamGeometry.dispose();
       photonMaterial.dispose();
       electronMaterial.dispose();
       beamMaterial.dispose();
+      impactGlowGeometry.dispose();
+      impactRingGeometry.dispose();
+      impactGlowMaterial.dispose();
+      impactRingMaterial.dispose();
       metalMaterial.dispose();
       brushedTexture.dispose();
       emitterCoreGeometry.dispose();
       emitterFrameGeometry.dispose();
       emitterFrameSideGeometry.dispose();
       emitterSlotGeometry.dispose();
-      emitterFrontGlow.geometry.dispose();
       emitterFrameMaterial.dispose();
       emitterSlotMaterial.dispose();
-      emitterFrontGlowMaterial.dispose();
       brushedLineGeometry.dispose();
       darkGrooveGeometry.dispose();
       plateGlintGeometry.dispose();
