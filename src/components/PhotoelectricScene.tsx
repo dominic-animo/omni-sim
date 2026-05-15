@@ -141,11 +141,34 @@ export function PhotoelectricScene({
     bottomGuide.position.set(0.35, -1.42, -1.24);
     scene.add(topGuide, bottomGuide);
 
+
+    const brushedTextureCanvas = document.createElement("canvas");
+    brushedTextureCanvas.width = 128;
+    brushedTextureCanvas.height = 128;
+    const brushedContext = brushedTextureCanvas.getContext("2d");
+    if (brushedContext) {
+      brushedContext.fillStyle = "#888";
+      brushedContext.fillRect(0, 0, 128, 128);
+      for (let y = 0; y < 128; y += 1) {
+        const line = 120 + Math.floor(Math.random() * 24);
+        brushedContext.fillStyle = `rgb(${line}, ${line}, ${line})`;
+        brushedContext.fillRect(0, y, 128, 1);
+      }
+    }
+    const brushedTexture = new THREE.CanvasTexture(brushedTextureCanvas);
+    brushedTexture.wrapS = THREE.RepeatWrapping;
+    brushedTexture.wrapT = THREE.RepeatWrapping;
+    brushedTexture.repeat.set(1, 5.5);
+    brushedTexture.anisotropy = 4;
+
     const metalMaterial = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(metalColor),
       emissive: new THREE.Color(metalColor).multiplyScalar(0.08),
       metalness: 0.68,
-      roughness: 0.22,
+      roughness: 0.3,
+      roughnessMap: brushedTexture,
+      normalMap: brushedTexture,
+      normalScale: new THREE.Vector2(0.22, 0.08),
       clearcoat: 0.64,
       clearcoatRoughness: 0.18,
       reflectivity: 0.58,
@@ -173,34 +196,34 @@ export function PhotoelectricScene({
     const brushedLineMaterial = new THREE.MeshBasicMaterial({
       color: 0xf4c95d,
       transparent: true,
-      opacity: 0.055,
+      opacity: 0.018,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const darkGrooveMaterial = new THREE.MeshBasicMaterial({
       color: 0x7ff8ff,
       transparent: true,
-      opacity: 0.045,
+      opacity: 0.022,
       depthWrite: false,
     });
     const plateGlintMaterial = new THREE.MeshBasicMaterial({
       color: 0xf4c95d,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.06,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const warmReflectionMaterial = new THREE.MeshBasicMaterial({
       color: 0xffd88a,
       transparent: true,
-      opacity: 0.13,
+      opacity: 0.07,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const coolReflectionMaterial = new THREE.MeshBasicMaterial({
       color: 0x9dfbff,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.06,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -539,8 +562,8 @@ export function PhotoelectricScene({
       const metal = new THREE.Color(currentMetal);
       metalMaterial.color.copy(metal).lerp(new THREE.Color(0xffe0a5), 0.34);
       metalMaterial.emissive.copy(metal).multiplyScalar(current.emission ? 0.18 : 0.1);
-      metalMaterial.roughness = current.emission ? 0.18 : 0.24;
-      plateGlintMaterial.opacity = 0.08 + current.relativeCurrent * 0.08;
+      metalMaterial.roughness = current.emission ? 0.24 : 0.32;
+      plateGlintMaterial.opacity = 0.035 + current.relativeCurrent * 0.04;
 
       plate.rotation.y = Math.sin(t * 0.009) * 0.035;
       collector.rotation.y = -plate.rotation.y;
@@ -548,6 +571,7 @@ export function PhotoelectricScene({
       collectorSurfaceDetails.rotation.x = -Math.sin(t * 0.006) * 0.012;
       collector.position.x = -0.45 + Math.min(4.2, Math.max(1.1, currentSpacing * 0.42));
       const emitterSurfaceX = plate.position.x + 0.18;
+      const emitterEmissionZ = -1.28;
       const collectorFaceX = collector.position.x - 0.16;
       const flightSpan = Math.max(0.2, collectorFaceX - emitterSurfaceX);
       const collectionFraction = Math.max(0, Math.min(1, current.collectionFraction));
@@ -625,9 +649,10 @@ export function PhotoelectricScene({
           particle.lane * 0.12 +
           Math.sin(t * 0.04 + index) * 0.12 +
           (reachesCollector ? 0 : Math.sin(particle.phase * Math.PI) * 0.22);
-        particle.mesh.position.z =
-          Math.sin(particle.phase * Math.PI * 2 + index) * 0.55;
-        particle.mesh.scale.setScalar((reachesCollector ? 1 : 0.82 + Math.sin(particle.phase * Math.PI) * 0.28) + current.maxKineticEnergyEv * 0.14);
+        const lateralSpread = Math.sin(particle.phase * Math.PI * 2 + index * 0.8) * 0.16;
+        const driftToCenter = reachesCollector ? particle.phase * 0.92 : particle.phase * 0.28;
+        particle.mesh.position.z = emitterEmissionZ + lateralSpread + driftToCenter;
+        particle.mesh.scale.setScalar((reachesCollector ? 1 : 0.82 + Math.sin(particle.phase * Math.PI) * 0.22) + current.maxKineticEnergyEv * 0.14);
       });
 
       sceneLabels.forEach((label) => {
@@ -660,6 +685,7 @@ export function PhotoelectricScene({
       electronMaterial.dispose();
       beamMaterial.dispose();
       metalMaterial.dispose();
+      brushedTexture.dispose();
       emitterCoreGeometry.dispose();
       emitterFrameGeometry.dispose();
       emitterFrameSideGeometry.dispose();
