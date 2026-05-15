@@ -277,8 +277,19 @@ export function PhotoelectricScene({
         emitterSurfaceDetails.add(bolt);
       });
     });
-    plate.add(emitterCore, emitterSurfaceDetails, emitterFrameTop, emitterFrameBottom, emitterFrameUpper, emitterFrameLower);
     const emitterSlotGeometry = new THREE.BoxGeometry(0.245, 0.035, 1.45);
+    const emitterFrontGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x7ff8ff,
+      transparent: true,
+      opacity: 0.16,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const emitterFrontGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 2.85), emitterFrontGlowMaterial);
+    emitterFrontGlow.position.set(-0.125, 0, -1.58);
+    emitterFrontGlow.rotation.y = Math.PI / 2;
+    plate.add(emitterCore, emitterSurfaceDetails, emitterFrameTop, emitterFrameBottom, emitterFrameUpper, emitterFrameLower, emitterFrontGlow);
     for (let i = 0; i < 5; i += 1) {
       const slot = new THREE.Mesh(emitterSlotGeometry, emitterSlotMaterial);
       slot.position.set(-0.015, -1.0 + i * 0.5, -1.58);
@@ -571,7 +582,7 @@ export function PhotoelectricScene({
       collectorSurfaceDetails.rotation.x = -Math.sin(t * 0.006) * 0.012;
       collector.position.x = -0.45 + Math.min(4.2, Math.max(1.1, currentSpacing * 0.42));
       const emitterSurfaceX = plate.position.x + 0.18;
-      const emitterEmissionZ = -1.28;
+      const emitterEmissionZ = -1.46;
       const collectorFaceX = collector.position.x - 0.16;
       const flightSpan = Math.max(0.2, collectorFaceX - emitterSurfaceX);
       const collectionFraction = Math.max(0, Math.min(1, current.collectionFraction));
@@ -589,6 +600,7 @@ export function PhotoelectricScene({
       fieldValue.position.x = (plate.position.x + collector.position.x) / 2;
       emitterFrameMaterial.opacity = 0.76 + current.relativeCurrent * 0.14;
       emitterSlotMaterial.opacity = 0.2 + current.electronRate * 0.36;
+      emitterFrontGlowMaterial.opacity = 0.08 + current.electronRate * 0.24;
       collectorAccentMaterial.opacity = 0.38 + current.relativeCurrent * 0.34;
       warmReflectionMaterial.opacity = 0.1 + current.relativeCurrent * 0.08;
       coolReflectionMaterial.opacity = 0.09 + current.relativeCurrent * 0.08;
@@ -649,8 +661,8 @@ export function PhotoelectricScene({
           particle.lane * 0.12 +
           Math.sin(t * 0.04 + index) * 0.12 +
           (reachesCollector ? 0 : Math.sin(particle.phase * Math.PI) * 0.22);
-        const lateralSpread = Math.sin(particle.phase * Math.PI * 2 + index * 0.8) * 0.16;
-        const driftToCenter = reachesCollector ? particle.phase * 0.92 : particle.phase * 0.28;
+        const lateralSpread = Math.sin(particle.phase * Math.PI * 2 + index * 0.8) * 0.08;
+        const driftToCenter = reachesCollector ? particle.phase * 0.38 : particle.phase * 0.12;
         particle.mesh.position.z = emitterEmissionZ + lateralSpread + driftToCenter;
         particle.mesh.scale.setScalar((reachesCollector ? 1 : 0.82 + Math.sin(particle.phase * Math.PI) * 0.22) + current.maxKineticEnergyEv * 0.14);
       });
@@ -690,8 +702,10 @@ export function PhotoelectricScene({
       emitterFrameGeometry.dispose();
       emitterFrameSideGeometry.dispose();
       emitterSlotGeometry.dispose();
+      emitterFrontGlow.geometry.dispose();
       emitterFrameMaterial.dispose();
       emitterSlotMaterial.dispose();
+      emitterFrontGlowMaterial.dispose();
       brushedLineGeometry.dispose();
       darkGrooveGeometry.dispose();
       plateGlintGeometry.dispose();
