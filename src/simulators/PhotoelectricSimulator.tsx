@@ -729,7 +729,7 @@ export default function PhotoelectricSimulator() {
           max={65}
           step={1}
           unit="deg"
-          description="Rotates the 3D camera view around the plates. Use it to inspect geometry and labels; it does not alter the physics or graph values."
+          description="Tilts the 2.5D cutaway instrument view for visual inspection. It does not alter wavelength, energy, voltage, current, or any graph values."
           onChange={setViewRotation}
         />
         <ControlSlider
@@ -739,7 +739,7 @@ export default function PhotoelectricSimulator() {
           max={1.45}
           step={0.01}
           unit="x"
-          description="Zooms the 3D camera in or out. Use it to test readability and particle visibility; it does not change plate spacing or any physical measurement."
+          description="Zooms the cutaway scene in or out to test readability and particle visibility. It does not change collector spacing or any physical measurement."
           onChange={setViewZoom}
         />
 
