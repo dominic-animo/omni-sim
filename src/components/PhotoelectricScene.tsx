@@ -571,6 +571,7 @@ export function PhotoelectricScene({
       collectorSurfaceDetails.rotation.x = -Math.sin(t * 0.006) * 0.012;
       collector.position.x = -0.45 + Math.min(4.2, Math.max(1.1, currentSpacing * 0.42));
       const emitterSurfaceX = plate.position.x + 0.18;
+      const emitterEmissionZ = -1.28;
       const collectorFaceX = collector.position.x - 0.16;
       const flightSpan = Math.max(0.2, collectorFaceX - emitterSurfaceX);
       const collectionFraction = Math.max(0, Math.min(1, current.collectionFraction));
@@ -648,9 +649,10 @@ export function PhotoelectricScene({
           particle.lane * 0.12 +
           Math.sin(t * 0.04 + index) * 0.12 +
           (reachesCollector ? 0 : Math.sin(particle.phase * Math.PI) * 0.22);
-        particle.mesh.position.z =
-          Math.sin(particle.phase * Math.PI * 2 + index) * 0.55;
-        particle.mesh.scale.setScalar((reachesCollector ? 1 : 0.82 + Math.sin(particle.phase * Math.PI) * 0.28) + current.maxKineticEnergyEv * 0.14);
+        const lateralSpread = Math.sin(particle.phase * Math.PI * 2 + index * 0.8) * 0.16;
+        const driftToCenter = reachesCollector ? particle.phase * 0.92 : particle.phase * 0.28;
+        particle.mesh.position.z = emitterEmissionZ + lateralSpread + driftToCenter;
+        particle.mesh.scale.setScalar((reachesCollector ? 1 : 0.82 + Math.sin(particle.phase * Math.PI) * 0.22) + current.maxKineticEnergyEv * 0.14);
       });
 
       sceneLabels.forEach((label) => {
