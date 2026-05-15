@@ -15,6 +15,26 @@ const simulatorModules = {
       default: module.VectorAdditionSimulator,
     })),
   ),
+  "matrix-transformation": lazy(() =>
+    import("./simulators/MicroSimulators").then((module) => ({
+      default: module.MatrixTransformationSimulator,
+    })),
+  ),
+  "dot-product-projection": lazy(() =>
+    import("./simulators/MicroSimulators").then((module) => ({
+      default: module.DotProductProjectionSimulator,
+    })),
+  ),
+  "linear-system-2x2": lazy(() =>
+    import("./simulators/MicroSimulators").then((module) => ({
+      default: module.LinearSystem2x2Simulator,
+    })),
+  ),
+  eigenvectors: lazy(() =>
+    import("./simulators/MicroSimulators").then((module) => ({
+      default: module.EigenvectorsSimulator,
+    })),
+  ),
   "linear-regression": lazy(() =>
     import("./simulators/MicroSimulators").then((module) => ({
       default: module.LinearRegressionSimulator,
@@ -213,7 +233,7 @@ function previewPalette(domain: string) {
   if (["Mechanics", "Gravity"].includes(domain)) return { a: "#f4c95d", b: "#7ff8ff", c: "#ff4df0" };
   if (["Thermodynamics", "Fluids"].includes(domain)) return { a: "#ff8a55", b: "#7ff8ff", c: "#f4c95d" };
   if (domain.includes("Chemistry")) return { a: "#a9ef78", b: "#ff8a55", c: "#7ff8ff" };
-  if (["Statistics", "Probability", "Functions", "Geometry", "Foundations", "Chaos"].includes(domain)) {
+  if (["Statistics", "Probability", "Functions", "Geometry", "Foundations", "Linear Algebra", "Chaos"].includes(domain)) {
     return { a: "#ff4df0", b: "#7ff8ff", c: "#f4c95d" };
   }
   return { a: "#7ff8ff", b: "#ff4df0", c: "#f4c95d" };
@@ -226,7 +246,7 @@ function SimulatorPreview({ simulatorId, domain }: { simulatorId: string; domain
   const drawCircuit = domain === "Electricity";
   const drawChemistry = domain.includes("Chemistry");
   const drawMechanics = ["Mechanics", "Forces"].includes(domain);
-  const drawStats = ["Statistics", "Probability", "Functions", "Foundations", "Geometry", "Chaos"].includes(domain);
+  const drawStats = ["Statistics", "Probability", "Functions", "Foundations", "Geometry", "Linear Algebra", "Chaos"].includes(domain);
   const drawOptics = domain === "Optics";
   const drawGravity = domain === "Gravity";
   const drawFluid = ["Fluids", "Thermodynamics"].includes(domain);
@@ -334,6 +354,37 @@ function SimulatorPreview({ simulatorId, domain }: { simulatorId: string; domain
             <path className="simPreviewTrace" d="M76 18 L124 34" stroke={palette.b} />
             <path className="simPreviewTrace thin" d="M34 42 L124 34" stroke={palette.c} />
             <path className="simPreviewTrace thin" d="M68 17 l9 1 -4 8 M116 29 l9 5 -9 5" stroke={palette.a} />
+          </>
+        ) : simulatorId === "matrix-transformation" ? (
+          <>
+            <path className="simPreviewTrace thin" d="M28 45 H132 M42 8 V50 M70 8 V50 M98 8 V50" stroke={palette.c} />
+            <path className="simPreviewTrace" d="M40 42 L80 32 L119 42 L78 51 Z" stroke={palette.b} />
+            <path className="simPreviewTrace" d="M40 42 L84 16" stroke={palette.a} />
+            <path className="simPreviewTrace" d="M40 42 L119 42" stroke={palette.c} />
+            <path className="simPreviewTrace thin" d="M78 17 l8 -1 -3 8 M111 37 l9 5 -9 5" stroke={palette.a} />
+          </>
+        ) : simulatorId === "dot-product-projection" ? (
+          <>
+            <path className="simPreviewTrace" d="M37 42 L126 18" stroke={palette.b} />
+            <path className="simPreviewTrace" d="M37 42 L83 12" stroke={palette.a} />
+            <path className="simPreviewTrace" d="M37 42 L92 27" stroke={palette.c} />
+            <path className="simPreviewTrace thin" d="M83 12 L92 27" stroke={palette.b} />
+            <path className="simPreviewTrace thin" d="M83 12 l8 0 -3 7 M118 17 l9 1 -5 7" stroke={palette.a} />
+          </>
+        ) : simulatorId === "linear-system-2x2" ? (
+          <>
+            <path className="simPreviewTrace" d="M18 47 L142 14" stroke={palette.a} />
+            <path className="simPreviewTrace" d="M24 12 L134 49" stroke={palette.b} />
+            <circle cx="80" cy="31" r="5" fill={palette.c} />
+            <path className="simPreviewTrace thin" d="M80 8 v43 M22 31 h116" stroke={palette.c} />
+          </>
+        ) : simulatorId === "eigenvectors" ? (
+          <>
+            <ellipse cx="80" cy="29" rx="47" ry="16" fill="none" stroke={palette.a} opacity="0.7" transform="rotate(-18 80 29)" />
+            <path className="simPreviewTrace" d="M35 43 L125 15" stroke={palette.b} />
+            <path className="simPreviewTrace thin" d="M49 13 L111 45" stroke={palette.c} />
+            <path className="simPreviewTrace" d="M80 29 L108 22" stroke={palette.a} />
+            <circle cx="108" cy="22" r="4" fill={palette.a} />
           </>
         ) : simulatorId === "linear-regression" ? (
           <>

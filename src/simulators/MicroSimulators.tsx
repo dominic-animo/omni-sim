@@ -33,6 +33,10 @@ import { useFullscreenMode } from "../hooks/useFullscreenMode";
 
 type MicroKind =
   | "vector"
+  | "matrixtransform"
+  | "dotproduct"
+  | "linearsystem"
+  | "eigenvectors"
   | "spring"
   | "projectile"
   | "superposition"
@@ -160,6 +164,27 @@ const historyCards = {
     kind: "Person",
     href: "https://en.wikipedia.org/wiki/William_Rowan_Hamilton",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/William_Rowan_Hamilton_portrait_oval_combined.png/330px-William_Rowan_Hamilton_portrait_oval_combined.png",
+  },
+  grassmann: {
+    name: "Hermann Grassmann",
+    role: "Built an early algebra of vectors, spans, and linear combinations.",
+    kind: "Person",
+    href: "https://en.wikipedia.org/wiki/Hermann_Grassmann",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Hermann_G%C3%BCnther_Gra%C3%9Fmann.jpg/330px-Hermann_G%C3%BCnther_Gra%C3%9Fmann.jpg",
+  },
+  cayley: {
+    name: "Arthur Cayley",
+    role: "Helped establish matrix algebra as an object of study in its own right.",
+    kind: "Person",
+    href: "https://en.wikipedia.org/wiki/Arthur_Cayley",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Arthur_Cayley.jpg/330px-Arthur_Cayley.jpg",
+  },
+  matrix: {
+    name: "Matrix",
+    role: "A rectangular number array that encodes linear transformations and systems.",
+    kind: "Evolution",
+    href: "https://en.wikipedia.org/wiki/Matrix_(mathematics)",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Matrix.svg/330px-Matrix.svg.png",
   },
   heaviside: {
     name: "Oliver Heaviside",
@@ -1069,6 +1094,258 @@ function drawMicroScene(
         cy + ry,
         "#a9ef78",
       );
+    }
+    return;
+  }
+
+  if (kind === "matrixtransform") {
+    const state = matrixTransformState(params);
+    const extrema = [
+      state.a,
+      state.b,
+      state.a + state.b,
+      state.c,
+      state.d,
+      state.c + state.d,
+      state.x,
+      state.y,
+      state.tx,
+      state.ty,
+      1,
+    ].map(Math.abs);
+    const scale = Math.min((width * 0.38) / Math.max(...extrema), (height * 0.34) / Math.max(...extrema), Math.min(width, height) * 0.085);
+    const px = (x: number) => cx + x * scale;
+    const py = (y: number) => cy - y * scale;
+    const transformed = (x: number, y: number) => ({ x: state.a * x + state.b * y, y: state.c * x + state.d * y });
+
+    context.strokeStyle = "rgba(233, 251, 255, 0.18)";
+    context.lineWidth = 1.2;
+    context.beginPath();
+    context.moveTo(0, cy);
+    context.lineTo(width, cy);
+    context.moveTo(cx, 0);
+    context.lineTo(cx, height);
+    context.stroke();
+
+    context.save();
+    context.strokeStyle = "rgba(127, 248, 255, 0.16)";
+    context.lineWidth = 1;
+    for (let i = -5; i <= 5; i += 1) {
+      const a = transformed(i, -5);
+      const b = transformed(i, 5);
+      const c = transformed(-5, i);
+      const d = transformed(5, i);
+      context.beginPath();
+      context.moveTo(px(a.x), py(a.y));
+      context.lineTo(px(b.x), py(b.y));
+      context.moveTo(px(c.x), py(c.y));
+      context.lineTo(px(d.x), py(d.y));
+      context.stroke();
+    }
+    context.restore();
+
+    const square = [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+    ];
+    context.setLineDash([6, 7]);
+    context.strokeStyle = "rgba(233, 251, 255, 0.35)";
+    context.beginPath();
+    square.forEach((point, index) => {
+      if (index === 0) context.moveTo(px(point.x), py(point.y));
+      else context.lineTo(px(point.x), py(point.y));
+    });
+    context.closePath();
+    context.stroke();
+    context.setLineDash([]);
+
+    const transformedSquare = square.map((point) => transformed(point.x, point.y));
+    context.fillStyle = "rgba(244, 201, 93, 0.12)";
+    context.strokeStyle = "#f4c95d";
+    context.shadowColor = "#f4c95d";
+    context.shadowBlur = 12;
+    context.beginPath();
+    transformedSquare.forEach((point, index) => {
+      if (index === 0) context.moveTo(px(point.x), py(point.y));
+      else context.lineTo(px(point.x), py(point.y));
+    });
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.shadowBlur = 0;
+
+    drawArrow(context, cx, cy, px(state.a), py(state.c), "#7ff8ff", 3.2);
+    drawArrow(context, cx, cy, px(state.b), py(state.d), "#ff4df0", 3.2);
+    drawArrow(context, cx, cy, px(state.x), py(state.y), "rgba(233, 251, 255, 0.78)", 2.7);
+    drawArrow(context, cx, cy, px(state.tx), py(state.ty), "#a9ef78", 4);
+    if (labelsVisible) {
+      drawSceneLabel(context, "Transformed Grid", clamp(px(state.a + state.b) + 12, 12, width - 138), clamp(py(state.c + state.d) - 24, 28, height - 36), px(state.a + state.b), py(state.c + state.d), "#f4c95d");
+      drawSceneLabel(context, "Output Vector", clamp(px(state.tx) + 16, 12, width - 126), clamp(py(state.ty) - 14, 28, height - 36), px(state.tx), py(state.ty), "#a9ef78");
+    }
+    if (valuesVisible) {
+      drawSceneLabel(context, `Det ${format(state.det, 2)}`, clamp(px(state.a + state.b) + 12, 12, width - 98), clamp(py(state.c + state.d) + 14, 28, height - 36), px(state.a + state.b), py(state.c + state.d), "#f4c95d");
+      drawSceneLabel(context, `(${format(state.tx, 2)}, ${format(state.ty, 2)})`, clamp(px(state.tx) + 16, 12, width - 126), clamp(py(state.ty) + 20, 28, height - 36), px(state.tx), py(state.ty), "#a9ef78");
+    }
+    return;
+  }
+
+  if (kind === "dotproduct") {
+    const state = dotProductState(params);
+    const maxCoord = Math.max(Math.abs(state.ax), Math.abs(state.ay), Math.abs(state.bx), Math.abs(state.by), Math.abs(state.projX), Math.abs(state.projY), 1);
+    const scale = Math.min((width * 0.38) / maxCoord, (height * 0.34) / maxCoord, Math.min(width, height) * 0.125);
+    const px = (x: number) => cx + x * scale;
+    const py = (y: number) => cy - y * scale;
+    context.strokeStyle = "rgba(233, 251, 255, 0.18)";
+    context.beginPath();
+    context.moveTo(0, cy);
+    context.lineTo(width, cy);
+    context.moveTo(cx, 0);
+    context.lineTo(cx, height);
+    context.stroke();
+    context.setLineDash([5, 6]);
+    context.strokeStyle = "rgba(244, 201, 93, 0.46)";
+    context.beginPath();
+    context.moveTo(px(state.ax), py(state.ay));
+    context.lineTo(px(state.projX), py(state.projY));
+    context.stroke();
+    context.setLineDash([]);
+    drawArrow(context, cx, cy, px(state.ax), py(state.ay), "#7ff8ff", 3.8);
+    drawArrow(context, cx, cy, px(state.bx), py(state.by), "#ff4df0", 3.8);
+    drawArrow(context, cx, cy, px(state.projX), py(state.projY), "#f4c95d", 3.2);
+    context.strokeStyle = "rgba(169, 239, 120, 0.45)";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(cx, cy, 34, -Math.atan2(state.ay, state.ax), -Math.atan2(state.by, state.bx), state.theta > 180);
+    context.stroke();
+    if (labelsVisible) {
+      drawSceneLabel(context, "Vector A", clamp(px(state.ax) + 14, 12, width - 94), clamp(py(state.ay) - 16, 28, height - 36), px(state.ax), py(state.ay), "#7ff8ff");
+      drawSceneLabel(context, "Projection On B", clamp(px(state.projX) + 14, 12, width - 132), clamp(py(state.projY) + 18, 28, height - 36), px(state.projX), py(state.projY), "#f4c95d");
+    }
+    if (valuesVisible) {
+      drawSceneLabel(context, `Dot ${format(state.dot, 2)}`, clamp(cx + 42, 12, width - 96), clamp(cy - 42, 28, height - 36), cx + 30, cy - 18, "#a9ef78");
+      drawSceneLabel(context, `${format(state.theta, 1)} deg`, clamp(cx + 32, 12, width - 92), clamp(cy + 24, 28, height - 36), cx + 26, cy + 8, "#a9ef78");
+    }
+    return;
+  }
+
+  if (kind === "linearsystem") {
+    const state = linearSystemState(params);
+    const range = Math.max(5, Math.abs(state.x) + 2, Math.abs(state.y) + 2, Math.abs(state.c1) + 1, Math.abs(state.c2) + 1);
+    const scale = Math.min((width * 0.42) / range, (height * 0.38) / range);
+    const px = (x: number) => cx + x * scale;
+    const py = (y: number) => cy - y * scale;
+    const linePoints = (a: number, b: number, c: number) => {
+      const points: Array<{ x: number; y: number }> = [];
+      const push = (x: number, y: number) => {
+        if (Number.isFinite(x) && Number.isFinite(y) && x >= -range && x <= range && y >= -range && y <= range) {
+          if (!points.some((point) => Math.hypot(point.x - x, point.y - y) < 0.001)) points.push({ x, y });
+        }
+      };
+      if (Math.abs(b) > 1e-6) {
+        push(-range, (c + a * range) / b);
+        push(range, (c - a * range) / b);
+      }
+      if (Math.abs(a) > 1e-6) {
+        push((c + b * range) / a, -range);
+        push((c - b * range) / a, range);
+      }
+      return points.slice(0, 2);
+    };
+    context.strokeStyle = "rgba(233, 251, 255, 0.18)";
+    context.beginPath();
+    context.moveTo(0, cy);
+    context.lineTo(width, cy);
+    context.moveTo(cx, 0);
+    context.lineTo(cx, height);
+    context.stroke();
+    [
+      { points: linePoints(state.a1, state.b1, state.c1), color: "#7ff8ff" },
+      { points: linePoints(state.a2, state.b2, state.c2), color: "#ff4df0" },
+    ].forEach((line) => {
+      if (line.points.length < 2) return;
+      context.strokeStyle = line.color;
+      context.shadowColor = line.color;
+      context.shadowBlur = 12;
+      context.lineWidth = 2.2;
+      context.beginPath();
+      context.moveTo(px(line.points[0].x), py(line.points[0].y));
+      context.lineTo(px(line.points[1].x), py(line.points[1].y));
+      context.stroke();
+      context.shadowBlur = 0;
+    });
+    if (!state.parallel) {
+      context.fillStyle = "#f4c95d";
+      context.shadowColor = "#f4c95d";
+      context.shadowBlur = 18;
+      context.beginPath();
+      context.arc(px(state.x), py(state.y), 5, 0, TAU);
+      context.fill();
+      context.shadowBlur = 0;
+    }
+    if (labelsVisible) {
+      drawSceneLabel(context, "Equation 1", width * 0.12, height * 0.18, width * 0.28, height * 0.26, "#7ff8ff");
+      drawSceneLabel(context, "Equation 2", width * 0.66, height * 0.72, width * 0.72, height * 0.62, "#ff4df0");
+      if (!state.parallel) drawSceneLabel(context, "Solution", clamp(px(state.x) + 14, 12, width - 90), clamp(py(state.y) - 18, 28, height - 36), px(state.x), py(state.y), "#f4c95d");
+    }
+    if (valuesVisible) {
+      const targetX = state.parallel ? cx : px(state.x);
+      const targetY = state.parallel ? cy : py(state.y);
+      drawSceneLabel(context, state.parallel ? "No Single Solution" : `(${format(state.x, 2)}, ${format(state.y, 2)})`, clamp(targetX + 14, 12, width - 142), clamp(targetY - 18, 28, height - 36), targetX, targetY, "#f4c95d");
+      drawSceneLabel(context, `Det ${format(state.det, 2)}`, width * 0.62, height * 0.2, width * 0.52, height * 0.5, "#a9ef78");
+    }
+    return;
+  }
+
+  if (kind === "eigenvectors") {
+    const state = eigenState(params);
+    const scale = Math.min(width, height) * 0.17;
+    const px = (x: number) => cx + x * scale;
+    const py = (y: number) => cy - y * scale;
+    context.strokeStyle = "rgba(233, 251, 255, 0.18)";
+    context.beginPath();
+    context.moveTo(0, cy);
+    context.lineTo(width, cy);
+    context.moveTo(cx, 0);
+    context.lineTo(cx, height);
+    context.stroke();
+    context.strokeStyle = "rgba(127, 248, 255, 0.25)";
+    context.lineWidth = 1.5;
+    context.beginPath();
+    for (let i = 0; i <= 120; i += 1) {
+      const t = (i / 120) * TAU;
+      const x = state.a * Math.cos(t) + state.b * Math.sin(t);
+      const y = state.b * Math.cos(t) + state.d * Math.sin(t);
+      if (i === 0) context.moveTo(px(x), py(y));
+      else context.lineTo(px(x), py(y));
+    }
+    context.closePath();
+    context.stroke();
+    [
+      { angle: state.eigAngle1, lambda: state.lambda1, color: "#f4c95d" },
+      { angle: state.eigAngle2, lambda: state.lambda2, color: "#ff4df0" },
+    ].forEach((axis) => {
+      const length = clamp(Math.abs(axis.lambda), 0.8, 2.8);
+      drawArrow(context, cx, cy, px(Math.cos(axis.angle) * length), py(Math.sin(axis.angle) * length), axis.color, 2.8);
+      drawArrow(context, cx, cy, px(-Math.cos(axis.angle) * length), py(-Math.sin(axis.angle) * length), axis.color, 2.2);
+    });
+    drawArrow(context, cx, cy, px(state.x), py(state.y), "#7ff8ff", 3.5);
+    drawArrow(context, cx, cy, px(state.tx), py(state.ty), "#a9ef78", 3.8);
+    context.setLineDash([5, 7]);
+    context.strokeStyle = "rgba(169, 239, 120, 0.38)";
+    context.beginPath();
+    context.moveTo(px(state.x), py(state.y));
+    context.lineTo(px(state.tx), py(state.ty));
+    context.stroke();
+    context.setLineDash([]);
+    if (labelsVisible) {
+      drawSceneLabel(context, "Eigen Direction 1", clamp(px(Math.cos(state.eigAngle1) * 2) + 12, 12, width - 134), clamp(py(Math.sin(state.eigAngle1) * 2) - 20, 28, height - 36), px(Math.cos(state.eigAngle1) * 2), py(Math.sin(state.eigAngle1) * 2), "#f4c95d");
+      drawSceneLabel(context, "Transformed Vector", clamp(px(state.tx) + 12, 12, width - 146), clamp(py(state.ty) + 18, 28, height - 36), px(state.tx), py(state.ty), "#a9ef78");
+    }
+    if (valuesVisible) {
+      drawSceneLabel(context, `Lambda 1 ${format(state.lambda1, 2)}`, width * 0.65, height * 0.18, px(Math.cos(state.eigAngle1) * 2), py(Math.sin(state.eigAngle1) * 2), "#f4c95d");
+      drawSceneLabel(context, `Alignment ${format((1 - state.aligned) * 100, 0)}%`, clamp(px(state.x) + 12, 12, width - 126), clamp(py(state.y) - 28, 28, height - 36), px(state.x), py(state.y), "#7ff8ff");
     }
     return;
   }
@@ -4995,6 +5272,105 @@ function vectorState(params: Params) {
   return { ax, ay, bx, by, rx, ry, mag: Math.hypot(rx, ry), angle: (Math.atan2(ry, rx) * 180) / Math.PI };
 }
 
+function matrixTransformState(params: Params) {
+  const a = params.a;
+  const b = params.b;
+  const c = params.c;
+  const d = params.d;
+  const x = params.x;
+  const y = params.y;
+  const tx = a * x + b * y;
+  const ty = c * x + d * y;
+  const det = a * d - b * c;
+  const trace = a + d;
+  const inputMag = Math.hypot(x, y);
+  const outputMag = Math.hypot(tx, ty);
+  return {
+    a,
+    b,
+    c,
+    d,
+    x,
+    y,
+    tx,
+    ty,
+    det,
+    trace,
+    inputMag,
+    outputMag,
+    areaScale: Math.abs(det),
+    orientation: det >= 0 ? "Preserved" : "Flipped",
+  };
+}
+
+function dotProductState(params: Params) {
+  const ax = params.ax;
+  const ay = params.ay;
+  const bx = params.bx;
+  const by = params.by;
+  const dot = ax * bx + ay * by;
+  const magA = Math.hypot(ax, ay);
+  const magB = Math.hypot(bx, by);
+  const cosTheta = magA * magB > 1e-8 ? clamp(dot / (magA * magB), -1, 1) : 0;
+  const theta = (Math.acos(cosTheta) * 180) / Math.PI;
+  const projectionScalar = magB > 1e-8 ? dot / (magB * magB) : 0;
+  const projX = projectionScalar * bx;
+  const projY = projectionScalar * by;
+  return {
+    ax,
+    ay,
+    bx,
+    by,
+    dot,
+    magA,
+    magB,
+    cosTheta,
+    theta,
+    projectionScalar,
+    projX,
+    projY,
+    projLength: Math.hypot(projX, projY),
+  };
+}
+
+function linearSystemState(params: Params) {
+  const a1 = params.a1;
+  const b1 = params.b1;
+  const c1 = params.c1;
+  const a2 = params.a2;
+  const b2 = params.b2;
+  const c2 = params.c2;
+  const det = a1 * b2 - a2 * b1;
+  const parallel = Math.abs(det) <= 1e-6;
+  const x = parallel ? 0 : (c1 * b2 - c2 * b1) / det;
+  const y = parallel ? 0 : (a1 * c2 - a2 * c1) / det;
+  const residual1 = a1 * x + b1 * y - c1;
+  const residual2 = a2 * x + b2 * y - c2;
+  return { a1, b1, c1, a2, b2, c2, det, x, y, parallel, residual1, residual2 };
+}
+
+function eigenState(params: Params) {
+  const a = params.a;
+  const b = params.b;
+  const d = params.d;
+  const theta = degToRad(params.vectorAngle);
+  const x = Math.cos(theta);
+  const y = Math.sin(theta);
+  const tx = a * x + b * y;
+  const ty = b * x + d * y;
+  const trace = a + d;
+  const det = a * d - b * b;
+  const delta = Math.sqrt(Math.max(0, (a - d) ** 2 + 4 * b * b));
+  const lambda1 = (trace + delta) / 2;
+  const lambda2 = (trace - delta) / 2;
+  const eigAngle1 = Math.abs(b) > 1e-6 || Math.abs(lambda1 - a) > 1e-6 ? Math.atan2(lambda1 - a, b) : 0;
+  const eigAngle2 = eigAngle1 + Math.PI / 2;
+  const cross = x * ty - y * tx;
+  const aligned = Math.abs(cross) / Math.max(Math.hypot(tx, ty), 1e-6);
+  const stretch = Math.hypot(tx, ty);
+  return { a, b, d, x, y, tx, ty, trace, det, lambda1, lambda2, eigAngle1, eigAngle2, aligned, stretch };
+}
+
 function projectileState(params: Params) {
   const angle = degToRad(params.angle);
   const g = Math.max(0.1, params.gravity);
@@ -5631,6 +6007,46 @@ function regressionState(params: Params) {
 }
 
 function microValueCallouts(kind: MicroKind, params: Params): ValueCallout[] {
+  if (kind === "matrixtransform") {
+    const state = matrixTransformState(params);
+    return [
+      { math: String.raw`\det(A)=${n(state.det)}`, x: 68, y: 27, targetX: 63, targetY: 42, color: "#f4c95d" },
+      { math: String.raw`A\vec{x}=(${n(state.tx)},${n(state.ty)})`, x: 54, y: 68, targetX: 58, targetY: 54, color: "#a9ef78" },
+      { math: String.raw`|\vec{x}'|=${n(state.outputMag)}`, x: 20, y: 25, targetX: 50, targetY: 50, color: "#7ff8ff" },
+      { math: String.raw`\mathrm{area}\times${n(state.areaScale)}`, x: 64, y: 43, targetX: 58, targetY: 42, color: "#ff4df0" },
+    ];
+  }
+
+  if (kind === "dotproduct") {
+    const state = dotProductState(params);
+    return [
+      { math: String.raw`\vec{a}\cdot\vec{b}=${n(state.dot)}`, x: 62, y: 28, targetX: 56, targetY: 48, color: "#a9ef78" },
+      { math: String.raw`\theta=${n(state.theta, 1)}^\circ`, x: 62, y: 46, targetX: 52, targetY: 50, color: "#f4c95d" },
+      { math: String.raw`\mathrm{proj}_{\vec b}\vec a`, x: 58, y: 66, targetX: 55, targetY: 55, color: "#f4c95d" },
+      { math: String.raw`\cos\theta=${n(state.cosTheta, 2)}`, x: 22, y: 26, targetX: 45, targetY: 50, color: "#7ff8ff" },
+    ];
+  }
+
+  if (kind === "linearsystem") {
+    const state = linearSystemState(params);
+    return [
+      { math: state.parallel ? String.raw`\det(A)\approx0` : String.raw`x=${n(state.x)}`, x: 62, y: 30, targetX: 54, targetY: 48, color: "#f4c95d" },
+      { math: state.parallel ? String.raw`\mathrm{parallel}` : String.raw`y=${n(state.y)}`, x: 62, y: 46, targetX: 54, targetY: 48, color: "#f4c95d" },
+      { math: String.raw`\det(A)=${n(state.det)}`, x: 20, y: 25, targetX: 50, targetY: 50, color: "#a9ef78" },
+      { math: String.raw`A\vec{x}=\vec{b}`, x: 20, y: 68, targetX: 40, targetY: 58, color: "#7ff8ff" },
+    ];
+  }
+
+  if (kind === "eigenvectors") {
+    const state = eigenState(params);
+    return [
+      { math: String.raw`\lambda_1=${n(state.lambda1)}`, x: 66, y: 24, targetX: 62, targetY: 38, color: "#f4c95d" },
+      { math: String.raw`\lambda_2=${n(state.lambda2)}`, x: 66, y: 42, targetX: 40, targetY: 62, color: "#ff4df0" },
+      { math: String.raw`|A\vec v|=${n(state.stretch)}`, x: 21, y: 28, targetX: 52, targetY: 45, color: "#a9ef78" },
+      { math: String.raw`\det(A)=${n(state.det)}`, x: 20, y: 68, targetX: 50, targetY: 50, color: "#7ff8ff" },
+    ];
+  }
+
   if (kind === "vector") {
     const state = vectorState(params);
     return [
@@ -6048,6 +6464,228 @@ const specs: Record<string, MicroSpec> = {
       links: [
         { label: "Vector Space", href: "https://en.wikipedia.org/wiki/Vector_space" },
         { label: "Josiah Willard Gibbs", href: "https://en.wikipedia.org/wiki/Josiah_Willard_Gibbs" },
+      ],
+    },
+  },
+  "matrix-transformation": {
+    kind: "matrixtransform",
+    title: "Matrix Transformation",
+    eyebrow: "Linear Algebra Micro Lab",
+    status: "Linear Map",
+    initial: { a: 1.15, b: 0.65, c: -0.25, d: 1.05, x: 2.2, y: 1.1 },
+    presets: [
+      { label: "Identity", description: "Leaves every vector unchanged", values: { a: 1, b: 0, c: 0, d: 1, x: 2.2, y: 1.1 } },
+      { label: "Shear", description: "Slides space sideways while preserving area", values: { a: 1, b: 0.9, c: 0, d: 1, x: 2.2, y: 1.1 } },
+      { label: "Scale", description: "Stretches x and compresses y", values: { a: 1.7, b: 0, c: 0, d: 0.65, x: 2.2, y: 1.1 } },
+      { label: "Rotate", description: "Approximate quarter-turn rotation", values: { a: 0, b: -1, c: 1, d: 0, x: 2.2, y: 1.1 } },
+      { label: "Reflect", description: "Flips orientation across a diagonal", values: { a: 0, b: 1, c: 1, d: 0, x: 2.2, y: 1.1 } },
+      { label: "Singular", description: "Collapses area onto a line", values: { a: 1, b: 1, c: 0.5, d: 0.5, x: 2.2, y: 1.1 } },
+    ],
+    controls: [
+      { key: "a", label: "Matrix Entry A", min: -2, max: 2, step: 0.05, unit: "", description: "Sets the top-left matrix entry. It controls how much the input x-coordinate contributes to the output x-coordinate, so it stretches or flips the horizontal basis direction." },
+      { key: "b", label: "Matrix Entry B", min: -2, max: 2, step: 0.05, unit: "", description: "Sets the top-right matrix entry. It controls how much the input y-coordinate contributes to the output x-coordinate, creating shear when it changes while the diagonal entries stay near one." },
+      { key: "c", label: "Matrix Entry C", min: -2, max: 2, step: 0.05, unit: "", description: "Sets the bottom-left matrix entry. It controls how much the input x-coordinate contributes to the output y-coordinate, tilting the transformed grid vertically." },
+      { key: "d", label: "Matrix Entry D", min: -2, max: 2, step: 0.05, unit: "", description: "Sets the bottom-right matrix entry. It controls how much the input y-coordinate contributes to the output y-coordinate, stretching or flipping the vertical basis direction." },
+      { key: "x", label: "Input X", min: -3, max: 3, step: 0.05, unit: "", description: "Moves the input vector horizontally before the matrix acts. The output vector follows by combining x times the first column with y times the second column." },
+      { key: "y", label: "Input Y", min: -3, max: 3, step: 0.05, unit: "", description: "Moves the input vector vertically before the matrix acts. Watch how changing y adds more of the transformed vertical basis vector to the result." },
+    ],
+    metrics: (p) => {
+      const state = matrixTransformState(p);
+      return [
+        { label: "Determinant", value: format(state.det, 2), tone: "#f4c95d", icon: Sigma },
+        { label: "Area Scale", value: `${format(state.areaScale, 2)}x`, tone: "#ff4df0", icon: Box },
+        { label: "Output Length", value: format(state.outputMag, 2), tone: "#a9ef78", icon: Compass },
+        { label: "Orientation", value: state.orientation, tone: "#7ff8ff", icon: CircleGauge },
+      ];
+    },
+    chart: (p) => {
+      const points = Array.from({ length: 120 }, (_, i) => {
+        const angle = (i / 119) * 360;
+        const x = Math.cos(degToRad(angle));
+        const y = Math.sin(degToRad(angle));
+        const state = matrixTransformState({ ...p, x, y });
+        return { x: angle, y: state.outputMag };
+      });
+      const activeAngle = (Math.atan2(p.y, p.x) * 180) / Math.PI;
+      const state = matrixTransformState(p);
+      return { label: "Unit Vector Stretch vs Direction (deg)", points, activeX: activeAngle, activeY: state.outputMag / Math.max(state.inputMag, 0.001), color: "#a9ef78", xUnit: "deg", yUnit: "x" };
+    },
+    equations: [String.raw`A=\begin{bmatrix}a&b\\c&d\end{bmatrix}`, String.raw`\vec{x}'=A\vec{x}`, String.raw`\det(A)=ad-bc`],
+    explanation: "A 2x2 matrix transforms the whole plane by moving the basis directions. Every vector follows as a weighted combination of the transformed basis vectors, and the determinant reports signed area scaling.",
+    history: {
+      body: [
+        "Linear algebra grew from solving simultaneous equations and organizing many coefficients without losing track of them. Matrices made that bookkeeping visual and reusable: the same rectangular array can encode equations, coordinate changes, rotations, shears, projections, and data transformations.",
+        "Cayley and other nineteenth-century mathematicians helped treat matrices as objects with their own algebra rather than just as shorthand for equations. That shift is why matrix multiplication, determinants, inverses, and eigenvectors can be studied as a coherent language.",
+        "The geometric interpretation is the most teachable version: a matrix moves the grid. Once you can see where the basis vectors go, the formula Ax stops looking like a black box and starts looking like controlled space deformation.",
+      ],
+      cards: [historyCards.grassmann, historyCards.cayley, historyCards.matrix],
+      links: [
+        { label: "Matrix", href: "https://en.wikipedia.org/wiki/Matrix_(mathematics)" },
+        { label: "Linear Map", href: "https://en.wikipedia.org/wiki/Linear_map" },
+        { label: "Determinant", href: "https://en.wikipedia.org/wiki/Determinant" },
+      ],
+    },
+  },
+  "dot-product-projection": {
+    kind: "dotproduct",
+    title: "Dot Product Projection",
+    eyebrow: "Linear Algebra Micro Lab",
+    status: "Projection And Angle",
+    initial: { ax: 3.2, ay: 1.4, bx: 2.1, by: 2.8 },
+    presets: [
+      { label: "Acute", description: "Positive dot product", values: { ax: 3.2, ay: 1.4, bx: 2.1, by: 2.8 } },
+      { label: "Right Angle", description: "Zero dot product", values: { ax: 3, ay: 1.5, bx: -1.5, by: 3 } },
+      { label: "Opposed", description: "Negative dot product", values: { ax: 3.2, ay: 0.8, bx: -2.8, by: -1.2 } },
+      { label: "Parallel", description: "Maximum positive alignment", values: { ax: 3.4, ay: 1.7, bx: 2.4, by: 1.2 } },
+    ],
+    controls: [
+      { key: "ax", label: "Vector A X", min: -5, max: 5, step: 0.1, unit: "", description: "Sets Vector A's horizontal component. The dot product changes by this component times Vector B X, so matching signs increase alignment." },
+      { key: "ay", label: "Vector A Y", min: -5, max: 5, step: 0.1, unit: "", description: "Sets Vector A's vertical component. Watch the projection foot move as Vector A swings above or below Vector B." },
+      { key: "bx", label: "Vector B X", min: -5, max: 5, step: 0.1, unit: "", description: "Sets Vector B's horizontal component. Vector B acts as the measuring direction for the projection, so rotating it changes the shadow cast by Vector A." },
+      { key: "by", label: "Vector B Y", min: -5, max: 5, step: 0.1, unit: "", description: "Sets Vector B's vertical component. Together with Vector B X it controls the angle used in the cosine form of the dot product." },
+    ],
+    metrics: (p) => {
+      const state = dotProductState(p);
+      return [
+        { label: "Dot Product", value: format(state.dot, 2), tone: "#a9ef78", icon: Sigma },
+        { label: "Angle", value: `${format(state.theta, 1)} deg`, tone: "#f4c95d", icon: CircleGauge },
+        { label: "Projection Length", value: format(state.projLength, 2), tone: "#7ff8ff", icon: Compass },
+        { label: "Cosine", value: format(state.cosTheta, 3), tone: "#ff4df0", icon: Activity },
+      ];
+    },
+    chart: (p) => {
+      const magB = Math.max(0.1, Math.hypot(p.bx, p.by));
+      const points = Array.from({ length: 120 }, (_, i) => {
+        const angle = -180 + (i / 119) * 360;
+        const bx = Math.cos(degToRad(angle)) * magB;
+        const by = Math.sin(degToRad(angle)) * magB;
+        return { x: angle, y: dotProductState({ ...p, bx, by }).dot };
+      });
+      const activeAngle = (Math.atan2(p.by, p.bx) * 180) / Math.PI;
+      return { label: "Dot Product vs Vector B Angle (deg)", points, activeX: activeAngle, activeY: dotProductState(p).dot, color: "#a9ef78", xUnit: "deg", yUnit: "dot" };
+    },
+    equations: [String.raw`\vec{a}\cdot\vec{b}=a_xb_x+a_yb_y`, String.raw`\vec{a}\cdot\vec{b}=|\vec{a}||\vec{b}|\cos\theta`, String.raw`\mathrm{proj}_{\vec b}\vec a=\frac{\vec a\cdot\vec b}{\vec b\cdot\vec b}\vec b`],
+    explanation: "The dot product measures how much two vectors point in the same direction. The projection is the shadow of Vector A onto Vector B, so perpendicular vectors give zero and opposite vectors give a negative value.",
+    history: {
+      body: [
+        "The dot product became natural as vector notation matured in mechanics and electromagnetism. Work in physics already needed a way to say that only the component of force along a displacement contributes to energy transfer.",
+        "Gibbs and Heaviside helped popularize the compact vector-analysis notation still used today. Their notation separated the scalar product from the vector product, making angle, projection, work, and component extraction easier to teach and calculate.",
+        "The same operation now appears across machine learning and graphics: similarity scores, lighting calculations, projections, correlation-like measurements, and orthogonality tests are all variations of this one geometric idea.",
+      ],
+      cards: [historyCards.gibbs, historyCards.heaviside, historyCards.hamilton],
+      links: [
+        { label: "Dot Product", href: "https://en.wikipedia.org/wiki/Dot_product" },
+        { label: "Projection", href: "https://en.wikipedia.org/wiki/Vector_projection" },
+      ],
+    },
+  },
+  "linear-system-2x2": {
+    kind: "linearsystem",
+    title: "2x2 Linear System",
+    eyebrow: "Linear Algebra Micro Lab",
+    status: "Line Intersection",
+    initial: { a1: 1, b1: 1, c1: 3, a2: 1.5, b2: -0.7, c2: 1 },
+    presets: [
+      { label: "Single Point", description: "Two clean intersecting lines", values: { a1: 1, b1: 1, c1: 3, a2: 1.5, b2: -0.7, c2: 1 } },
+      { label: "Steep Cross", description: "Nearly vertical and shallow lines", values: { a1: 2.8, b1: 0.7, c1: 2.4, a2: -0.4, b2: 1.4, c2: 1.6 } },
+      { label: "Parallel", description: "No single intersection", values: { a1: 1, b1: 1, c1: 2, a2: 2, b2: 2, c2: 5 } },
+      { label: "Shared Line", description: "Infinitely many solutions", values: { a1: 1, b1: -1, c1: 1, a2: 2, b2: -2, c2: 2 } },
+    ],
+    controls: [
+      { key: "a1", label: "Line 1 X Coefficient", min: -4, max: 4, step: 0.05, unit: "", description: "Sets how strongly x contributes to the first equation. It rotates Line 1 and changes the determinant that decides whether a unique solution exists." },
+      { key: "b1", label: "Line 1 Y Coefficient", min: -4, max: 4, step: 0.05, unit: "", description: "Sets how strongly y contributes to the first equation. Together with Line 1 X Coefficient it controls the line's normal direction." },
+      { key: "c1", label: "Line 1 Constant", min: -8, max: 8, step: 0.1, unit: "", description: "Shifts Line 1 without changing its angle. Watch the solution point slide where the two equations remain simultaneously true." },
+      { key: "a2", label: "Line 2 X Coefficient", min: -4, max: 4, step: 0.05, unit: "", description: "Sets how strongly x contributes to the second equation. If Line 2 becomes a scaled copy of Line 1, the determinant approaches zero." },
+      { key: "b2", label: "Line 2 Y Coefficient", min: -4, max: 4, step: 0.05, unit: "", description: "Sets how strongly y contributes to the second equation. It rotates Line 2 and changes the intersection geometry." },
+      { key: "c2", label: "Line 2 Constant", min: -8, max: 8, step: 0.1, unit: "", description: "Shifts Line 2. Parallel lines stay separated unless the constants also match as the same scale factor." },
+    ],
+    metrics: (p) => {
+      const state = linearSystemState(p);
+      return [
+        { label: "Solution X", value: state.parallel ? "none" : format(state.x, 2), tone: "#f4c95d", icon: Compass },
+        { label: "Solution Y", value: state.parallel ? "none" : format(state.y, 2), tone: "#7ff8ff", icon: Compass },
+        { label: "Determinant", value: format(state.det, 2), tone: "#a9ef78", icon: Sigma },
+        { label: "Residual", value: format(Math.abs(state.residual1) + Math.abs(state.residual2), 3), tone: "#ff4df0", icon: Activity },
+      ];
+    },
+    chart: (p) => ({
+      label: "Determinant vs Line 2 X Coefficient",
+      points: Array.from({ length: 100 }, (_, i) => {
+        const a2 = -4 + (i / 99) * 8;
+        return { x: a2, y: linearSystemState({ ...p, a2 }).det };
+      }),
+      activeX: p.a2,
+      activeY: linearSystemState(p).det,
+      color: "#a9ef78",
+      xUnit: "a2",
+      yUnit: "det",
+    }),
+    equations: [String.raw`a_1x+b_1y=c_1`, String.raw`A\vec{x}=\vec{b}`, String.raw`\det(A)=a_1b_2-a_2b_1`],
+    explanation: "A 2x2 linear system is two line constraints. A unique solution exists where the lines cross; a zero determinant means the constraints have become parallel or identical, so there is no single crossing point.",
+    history: {
+      body: [
+        "Systems of linear equations are older than modern algebra notation. Ancient calculation traditions already solved collections of unknowns using tabular procedures that resemble elimination.",
+        "Matrix notation made the structure visible: coefficients form A, unknowns form x, and constants form b. That compact representation allowed elimination, inverses, determinants, and later numerical methods to scale beyond two equations.",
+        "The two-line picture remains useful because it shows what algebraic failure means geometrically. A determinant near zero is not just a small number; it means the two constraints almost point in the same direction, so the intersection becomes unstable.",
+      ],
+      cards: [historyCards.cayley, historyCards.matrix, historyCards.grassmann],
+      links: [
+        { label: "System Of Linear Equations", href: "https://en.wikipedia.org/wiki/System_of_linear_equations" },
+        { label: "Gaussian Elimination", href: "https://en.wikipedia.org/wiki/Gaussian_elimination" },
+      ],
+    },
+  },
+  eigenvectors: {
+    kind: "eigenvectors",
+    title: "Eigenvectors",
+    eyebrow: "Linear Algebra Micro Lab",
+    status: "Invariant Directions",
+    initial: { a: 1.6, b: 0.65, d: 0.75, vectorAngle: 34 },
+    presets: [
+      { label: "Diagonal", description: "Eigenvectors align with axes", values: { a: 1.8, b: 0, d: 0.7, vectorAngle: 28 } },
+      { label: "Coupled", description: "Rotated eigen directions", values: { a: 1.6, b: 0.65, d: 0.75, vectorAngle: 34 } },
+      { label: "Saddle", description: "One stretch and one flip", values: { a: 1.2, b: 0.5, d: -0.9, vectorAngle: 20 } },
+      { label: "Near Equal", description: "Weak directional preference", values: { a: 1.1, b: 0.08, d: 1.0, vectorAngle: 58 } },
+    ],
+    controls: [
+      { key: "a", label: "Matrix Entry A", min: -2, max: 3, step: 0.05, unit: "", description: "Sets the horizontal-axis stretch in the symmetric matrix. It moves the eigenvalues and can rotate the dominant eigen direction when combined with Coupling." },
+      { key: "b", label: "Coupling Entry B", min: -2, max: 2, step: 0.05, unit: "", description: "Sets the off-diagonal coupling. Higher magnitude mixes x and y, rotating the eigenvectors away from the coordinate axes." },
+      { key: "d", label: "Matrix Entry D", min: -2, max: 3, step: 0.05, unit: "", description: "Sets the vertical-axis stretch in the symmetric matrix. Compare it with Matrix Entry A to see which eigen direction dominates." },
+      { key: "vectorAngle", label: "Test Vector Angle", min: -180, max: 180, step: 1, unit: "deg", description: "Rotates the test vector. When it lines up with an eigenvector, the transformed vector stays on the same line and only scales or flips." },
+    ],
+    metrics: (p) => {
+      const state = eigenState(p);
+      return [
+        { label: "Lambda 1", value: format(state.lambda1, 2), tone: "#f4c95d", icon: Sigma },
+        { label: "Lambda 2", value: format(state.lambda2, 2), tone: "#ff4df0", icon: Sigma },
+        { label: "Stretch", value: format(state.stretch, 2), tone: "#a9ef78", icon: Compass },
+        { label: "Alignment", value: `${format((1 - state.aligned) * 100, 0)}%`, tone: "#7ff8ff", icon: CircleGauge },
+      ];
+    },
+    chart: (p) => ({
+      label: "Stretch Factor vs Vector Angle (deg)",
+      points: Array.from({ length: 120 }, (_, i) => {
+        const vectorAngle = -180 + (i / 119) * 360;
+        return { x: vectorAngle, y: eigenState({ ...p, vectorAngle }).stretch };
+      }),
+      activeX: p.vectorAngle,
+      activeY: eigenState(p).stretch,
+      color: "#a9ef78",
+      xUnit: "deg",
+      yUnit: "x",
+    }),
+    equations: [String.raw`A\vec{v}=\lambda\vec{v}`, String.raw`A=\begin{bmatrix}a&b\\b&d\end{bmatrix}`, String.raw`\lambda^2-\mathrm{tr}(A)\lambda+\det(A)=0`],
+    explanation: "An eigenvector is a direction that a matrix does not rotate away from. The eigenvalue says how much that direction is stretched, compressed, or flipped.",
+    history: {
+      body: [
+        "Eigenvalue ideas appeared in problems about axes, vibrations, conic sections, and differential equations before the modern word eigenvector became standard. The core question was practical: which directions or modes keep their identity under a transformation?",
+        "In mechanics and physics, eigenvectors became indispensable because natural modes often decouple complicated motion. A vibrating string, a rotating rigid body, a quantum state, or a data covariance matrix can become clearer when expressed in its own preferred directions.",
+        "The name comes from German mathematical language, where eigen means own or characteristic. That wording is apt: eigenvectors are the matrix's own directions, the directions that reveal what the transformation is intrinsically doing.",
+      ],
+      cards: [historyCards.cayley, historyCards.grassmann, historyCards.matrix],
+      links: [
+        { label: "Eigenvalues And Eigenvectors", href: "https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors" },
+        { label: "Principal Component Analysis", href: "https://en.wikipedia.org/wiki/Principal_component_analysis" },
       ],
     },
   },
@@ -8248,6 +8886,22 @@ function MicroSimulator({ id }: { id: keyof typeof specs }) {
 
 export function VectorAdditionSimulator() {
   return <MicroSimulator id="vector-addition" />;
+}
+
+export function MatrixTransformationSimulator() {
+  return <MicroSimulator id="matrix-transformation" />;
+}
+
+export function DotProductProjectionSimulator() {
+  return <MicroSimulator id="dot-product-projection" />;
+}
+
+export function LinearSystem2x2Simulator() {
+  return <MicroSimulator id="linear-system-2x2" />;
+}
+
+export function EigenvectorsSimulator() {
+  return <MicroSimulator id="eigenvectors" />;
 }
 
 export function LinearRegressionSimulator() {

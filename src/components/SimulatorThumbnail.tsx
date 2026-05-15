@@ -24,7 +24,7 @@ function thumbnailPalette(domain: string): Palette {
   if (["Mechanics", "Gravity"].includes(domain)) return { a: "#f4c95d", b: "#7ff8ff", c: "#ff4df0" };
   if (["Thermodynamics", "Fluids"].includes(domain)) return { a: "#ff8a55", b: "#7ff8ff", c: "#f4c95d" };
   if (domain.includes("Chemistry")) return { a: "#a9ef78", b: "#ff8a55", c: "#7ff8ff" };
-  if (["Statistics", "Probability", "Functions", "Geometry", "Foundations", "Chaos"].includes(domain)) {
+  if (["Statistics", "Probability", "Functions", "Geometry", "Foundations", "Linear Algebra", "Chaos"].includes(domain)) {
     return { a: "#ff4df0", b: "#7ff8ff", c: "#f4c95d" };
   }
   return { a: "#7ff8ff", b: "#ff4df0", c: "#f4c95d" };
@@ -337,6 +337,45 @@ function glyphFor(simulatorId: string): ReactNode {
           <path className="thumbLine" d="M29 13 L51 27" stroke="var(--thumb-b)" />
           <path className="thumbFine" d="M12 33 L51 27" stroke="var(--thumb-c)" />
           <path className="thumbFine" d="M26 13 l4 0 -1 5 M47 24 l5 3 -5 3" stroke="var(--thumb-a)" />
+        </>
+      );
+    case "matrix-transformation":
+      return (
+        <>
+          <path className="thumbAxis" d="M12 35 H55 M20 9 V38 M34 9 V38 M48 9 V38" />
+          <path className="thumbFine" d="M16 32 L34 24 L52 32 L34 39 Z" stroke="var(--thumb-b)" />
+          <path className="thumbLine" d="M16 32 L36 12" stroke="var(--thumb-a)" />
+          <path className="thumbLine" d="M16 32 L52 32" stroke="var(--thumb-c)" />
+          <path className="thumbFine" d="M33 12 l4 0 -1 5 M48 29 l5 3 -5 3" stroke="var(--thumb-a)" />
+        </>
+      );
+    case "dot-product-projection":
+      return (
+        <>
+          <path className="thumbLine" d="M13 33 L53 13" stroke="var(--thumb-b)" />
+          <path className="thumbLine" d="M13 33 L34 11" stroke="var(--thumb-a)" />
+          <path className="thumbLine" d="M13 33 L39 20" stroke="var(--thumb-c)" />
+          <path className="thumbFine" d="M34 11 L39 20" stroke="var(--thumb-b)" />
+          <path className="thumbFine" d="M31 11 l4 -1 0 5 M49 12 l5 1 -3 4" stroke="var(--thumb-a)" />
+        </>
+      );
+    case "linear-system-2x2":
+      return (
+        <>
+          <path className="thumbAxis" d="M32 7 V38 M8 23 H58" />
+          <path className="thumbLine" d="M8 35 L58 12" stroke="var(--thumb-a)" />
+          <path className="thumbLine" d="M11 9 L55 36" stroke="var(--thumb-b)" />
+          <circle className="thumbDot" cx="34" cy="23" r="2.4" fill="var(--thumb-c)" />
+        </>
+      );
+    case "eigenvectors":
+      return (
+        <>
+          <ellipse className="thumbFine" cx="32" cy="22" rx="21" ry="7" fill="none" stroke="var(--thumb-a)" transform="rotate(-18 32 22)" />
+          <path className="thumbLine" d="M12 33 L53 12" stroke="var(--thumb-b)" />
+          <path className="thumbFine" d="M18 10 L47 36" stroke="var(--thumb-c)" />
+          <path className="thumbLine" d="M32 22 L45 17" stroke="var(--thumb-a)" />
+          <circle className="thumbDot" cx="45" cy="17" r="2" fill="var(--thumb-a)" />
         </>
       );
     case "linear-regression":
