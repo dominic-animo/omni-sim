@@ -588,7 +588,11 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 16px 24px 8px;
+  padding: 18px 26px 10px;
+  border-bottom: 1px solid rgba(127, 248, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(10, 22, 31, 0.62), rgba(6, 13, 19, 0.24)),
+    radial-gradient(circle at 12% 0%, rgba(127, 248, 255, 0.12), transparent 48%);
 }
 
 .transport {
@@ -1323,7 +1327,12 @@ h2 {
 
 .photoelectricStage .chartPanel,
 .photoelectricStage .equationPanel {
-  min-height: 112px;
+  min-height: 120px;
+  border-color: rgba(127, 248, 255, 0.22);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    inset 0 0 24px rgba(127, 248, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .photoelectricStage .chartPanel > svg {
@@ -1335,7 +1344,35 @@ h2 {
 }
 
 .photoelectricStage .equationPanel p {
-  font-size: 0.7rem;
+  font-size: 0.74rem;
+  color: #d7eef3;
+}
+
+.photoelectricControlDock .presetGrid button {
+  border: 1px solid rgba(127, 248, 255, 0.24);
+  background:
+    linear-gradient(145deg, rgba(127, 248, 255, 0.08), rgba(255, 77, 240, 0.04)),
+    rgba(5, 14, 20, 0.78);
+  box-shadow:
+    inset 0 0 14px rgba(127, 248, 255, 0.05),
+    0 4px 10px rgba(0, 0, 0, 0.18);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 180ms ease;
+}
+
+.photoelectricControlDock .presetGrid button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 77, 240, 0.55);
+  box-shadow:
+    0 10px 20px rgba(255, 77, 240, 0.12),
+    inset 0 0 16px rgba(127, 248, 255, 0.08);
+}
+
+.photoelectricControlDock .presetGrid button.selected {
+  border-color: rgba(127, 248, 255, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(127, 248, 255, 0.4),
+    0 10px 26px rgba(127, 248, 255, 0.15),
+    inset 0 0 20px rgba(127, 248, 255, 0.12);
 }
 
 .chartPanel,
